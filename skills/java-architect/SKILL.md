@@ -3,7 +3,7 @@ name: java-architect
 description: Use when building enterprise Java applications with Spring Boot 3.x, microservices, or reactive programming. Invoke for WebFlux, JPA optimization, Spring Security, cloud-native patterns.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: language
   triggers: Spring Boot, Java, microservices, Spring Cloud, JPA, Hibernate, WebFlux, reactive, Java Enterprise

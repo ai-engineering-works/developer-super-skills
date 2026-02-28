@@ -3,7 +3,7 @@ name: nestjs-expert
 description: Use when building NestJS applications requiring modular architecture, dependency injection, or TypeScript backend development. Invoke for modules, controllers, services, DTOs, guards, interceptors, TypeORM/Prisma.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: backend
   triggers: NestJS, Nest, Node.js backend, TypeScript backend, dependency injection, controller, service, module, guard, interceptor

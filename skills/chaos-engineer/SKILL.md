@@ -3,7 +3,7 @@ name: chaos-engineer
 description: Use when designing chaos experiments, implementing failure injection frameworks, or conducting game day exercises. Invoke for chaos experiments, resilience testing, blast radius control, game days, antifragile systems.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: devops
   triggers: chaos engineering, resilience testing, failure injection, game day, blast radius, chaos experiment, fault injection, Chaos Monkey, Litmus Chaos, antifragile

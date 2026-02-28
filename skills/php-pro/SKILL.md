@@ -3,7 +3,7 @@ name: php-pro
 description: Use when building PHP applications with modern PHP 8.3+ features, Laravel, or Symfony frameworks. Invoke for strict typing, PHPStan level 9, async patterns with Swoole, PSR standards.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: language
   triggers: PHP, Laravel, Symfony, Composer, PHPStan, PSR, PHP API, Eloquent, Doctrine

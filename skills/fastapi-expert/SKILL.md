@@ -3,7 +3,7 @@ name: fastapi-expert
 description: Use when building high-performance async Python APIs with FastAPI and Pydantic V2. Invoke for async SQLAlchemy, JWT authentication, WebSockets, OpenAPI documentation.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: backend
   triggers: FastAPI, Pydantic, async Python, Python API, REST API Python, SQLAlchemy async, JWT authentication, OpenAPI, Swagger Python

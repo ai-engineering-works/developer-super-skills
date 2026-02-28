@@ -3,7 +3,7 @@ name: typescript-pro
 description: Use when building TypeScript applications requiring advanced type systems, generics, or full-stack type safety. Invoke for type guards, utility types, tRPC integration, monorepo setup.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: selvkumaresra
   version: "1.0.0"
   domain: language
   triggers: TypeScript, generics, type safety, conditional types, mapped types, tRPC, tsconfig, type guards, discriminated unions

@@ -3,7 +3,7 @@ name: debugging-wizard
 description: Use when investigating errors, analyzing stack traces, or finding root causes of unexpected behavior. Invoke for error investigation, troubleshooting, log analysis, root cause analysis.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: quality
   triggers: debug, error, bug, exception, traceback, stack trace, troubleshoot, not working, crash, fix issue

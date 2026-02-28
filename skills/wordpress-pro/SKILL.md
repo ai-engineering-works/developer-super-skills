@@ -3,7 +3,7 @@ name: wordpress-pro
 description: Use when developing WordPress themes, plugins, customizing Gutenberg blocks, implementing WooCommerce features, or optimizing WordPress performance and security.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: platform
   triggers: WordPress, WooCommerce, Gutenberg, WordPress theme, WordPress plugin, custom blocks, ACF, WordPress REST API, hooks, filters, WordPress performance, WordPress security

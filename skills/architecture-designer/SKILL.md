@@ -3,7 +3,7 @@ name: architecture-designer
 description: Use when designing new system architecture, reviewing existing designs, or making architectural decisions. Invoke for system design, architecture review, design patterns, ADRs, scalability planning.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: api-architecture
   triggers: architecture, system design, design pattern, microservices, scalability, ADR, technical design, infrastructure

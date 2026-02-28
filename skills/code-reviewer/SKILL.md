@@ -4,7 +4,7 @@ description: Use when reviewing pull requests, conducting code quality audits, o
 license: MIT
 allowed-tools: Read, Grep, Glob
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: quality
   triggers: code review, PR review, pull request, review code, code quality

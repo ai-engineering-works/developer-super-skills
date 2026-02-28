@@ -4,7 +4,7 @@ description: Use when understanding legacy or undocumented systems, creating doc
 license: MIT
 allowed-tools: Read, Grep, Glob, Bash
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: workflow
   triggers: reverse engineer, legacy code, code analysis, undocumented, understand codebase, existing system

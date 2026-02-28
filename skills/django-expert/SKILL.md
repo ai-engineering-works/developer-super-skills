@@ -3,7 +3,7 @@ name: django-expert
 description: Use when building Django web applications or REST APIs with Django REST Framework. Invoke for Django models, ORM optimization, DRF serializers, viewsets, authentication with JWT.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: backend
   triggers: Django, DRF, Django REST Framework, Django ORM, Django model, serializer, viewset, Python web

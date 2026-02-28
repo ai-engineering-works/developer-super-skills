@@ -3,7 +3,7 @@ name: shopify-expert
 description: Use when building Shopify themes, apps, custom storefronts, or e-commerce solutions. Invoke for Liquid templating, Storefront API, app development, checkout customization, Shopify Plus features.
 license: MIT
 metadata:
-  author: https://github.com/Jeffallan
+  author: https://github.com/selvakumarEsra
   version: "1.0.0"
   domain: platform
   triggers: Shopify, Liquid, Storefront API, Shopify Plus, Hydrogen, Shopify app, checkout extensions, Shopify Functions, App Bridge, theme development, e-commerce, Polaris
