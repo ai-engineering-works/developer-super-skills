@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: optimization
   output-format: analysis-and-code
-  related-skills: devops-engineer,csharp-developer,graphql-architect,java-architect,postgres-pro,rag-architect,rails-expert,spring-boot-engineer
+  related-skills: devops-engineer,graphql-architect,java-architect,postgres-pro,rag-architect,spring-boot-engineer
 ---
 
 # Database Optimizer

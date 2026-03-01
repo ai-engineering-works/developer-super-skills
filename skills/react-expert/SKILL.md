@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: fullstack-guardian, playwright-expert, test-master,react-native-expert,shopify-expert
+  related-skills: fullstack-guardian, playwright-expert, test-master,react-native-expert
 ---
 
 # React Expert

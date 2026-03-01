@@ -10,7 +10,7 @@ metadata:
   role: architect
   scope: infrastructure
   output-format: architecture
-  related-skills: devops-engineer, kubernetes-specialist, terraform-engineer, security-reviewer, microservices-architect, monitoring-expert,dotnet-core-expert,ml-pipeline,salesforce-developer,sre-engineer
+  related-skills: devops-engineer, kubernetes-specialist, terraform-engineer, security-reviewer, microservices-architect, monitoring-expert,ml-pipeline,sre-engineer
 ---
 
 # Cloud Architect

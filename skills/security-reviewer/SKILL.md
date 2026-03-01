@@ -11,7 +11,7 @@ metadata:
   role: specialist
   scope: review
   output-format: report
-  related-skills: secure-code-guardian, code-reviewer, devops-engineer, cloud-architect, kubernetes-specialist,api-designer,atlassian-mcp,laravel-specialist,mcp-developer,websocket-engineer,wordpress-pro
+  related-skills: secure-code-guardian, code-reviewer, devops-engineer, cloud-architect, kubernetes-specialist,api-designer,atlassian-mcp,mcp-developer,websocket-engineer
 ---
 
 # Security Reviewer

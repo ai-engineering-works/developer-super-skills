@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: testing
   output-format: report
-  related-skills: fullstack-guardian, playwright-expert, devops-engineer,angular-architect,code-reviewer,debugging-wizard,django-expert,dotnet-core-expert,fastapi-expert,feature-forge,flutter-expert,golang-pro,kotlin-specialist,laravel-specialist,legacy-modernizer,nestjs-expert,prompt-engineer,react-expert,react-native-expert,rust-engineer,writing-skills
+  related-skills: fullstack-guardian, playwright-expert, devops-engineer,angular-architect,code-reviewer,debugging-wizard,django-expert,fastapi-expert,feature-forge,flutter-expert,golang-pro,kotlin-specialist,legacy-modernizer,nestjs-expert,prompt-engineer,react-expert,react-native-expert,rust-engineer,writing-skills
 ---
 
 # Test Master

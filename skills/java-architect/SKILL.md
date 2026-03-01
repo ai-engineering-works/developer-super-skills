@@ -10,7 +10,7 @@ metadata:
   role: architect
   scope: implementation
   output-format: code
-  related-skills: fullstack-guardian, api-designer, devops-engineer, database-optimizer,salesforce-developer,spring-boot-engineer,writing-plans
+  related-skills: fullstack-guardian, api-designer, devops-engineer, database-optimizer, spring-boot-engineer, writing-plans
 ---
 
 # Java Architect

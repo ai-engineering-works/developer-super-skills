@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: fullstack-guardian, django-expert, test-master,api-designer,mcp-developer,php-pro,python-pro,websocket-engineer
+  related-skills: fullstack-guardian, django-expert, test-master,api-designer,mcp-developer,python-pro,websocket-engineer
 ---
 
 # FastAPI Expert

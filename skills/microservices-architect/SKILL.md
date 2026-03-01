@@ -10,7 +10,7 @@ metadata:
   role: architect
   scope: system-design
   output-format: architecture
-  related-skills: devops-engineer, kubernetes-specialist, graphql-architect, architecture-designer, monitoring-expert,cloud-architect,dotnet-core-expert,golang-pro,spring-boot-engineer
+  related-skills: devops-engineer, kubernetes-specialist, graphql-architect, architecture-designer, monitoring-expert,cloud-architect,golang-pro,spring-boot-engineer
 ---
 
 # Microservices Architect

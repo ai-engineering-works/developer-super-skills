@@ -10,7 +10,7 @@ metadata:
   role: architect
   scope: design
   output-format: schema
-  related-skills: api-designer, microservices-architect, database-optimizer,shopify-expert
+  related-skills: api-designer, microservices-architect, database-optimizer
 ---
 
 # GraphQL Architect

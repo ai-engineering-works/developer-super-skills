@@ -10,7 +10,7 @@ metadata:
   role: engineer
   scope: implementation
   output-format: code
-  related-skills: cloud-architect,kubernetes-specialist,terraform-engineer,sre-engineer,spring-boot-engineer,database-optimizer,sql-pro,test-master,websocket-engineer,security-reviewer,architecture-designer,chaos-engineer,cli-developer,csharp-developer,fine-tuning-expert,fullstack-guardian,golang-pro,java-architect,laravel-specialist,legacy-modernizer,mcp-developer,microservices-architect,ml-pipeline,monitoring-expert,nestjs-expert,playwright-expert,postgres-pro,python-pro,salesforce-developer,spark-engineer
+  related-skills: cloud-architect,kubernetes-specialist,terraform-engineer,sre-engineer,spring-boot-engineer,database-optimizer,sql-pro,test-master,websocket-engineer,security-reviewer,architecture-designer,chaos-engineer,cli-developer,fine-tuning-expert,fullstack-guardian,golang-pro,java-architect,legacy-modernizer,mcp-developer,microservices-architect,ml-pipeline,monitoring-expert,nestjs-expert,playwright-expert,postgres-pro,python-pro,spark-engineer
 ---
 
 # DevOps Engineer

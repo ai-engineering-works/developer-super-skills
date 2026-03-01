@@ -14,10 +14,7 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **[Rust Engineer](https://selvakumarEsra.github.io/claude-skills/skills/language/rust-engineer/)**: Rust systems programming, ownership, lifetimes, async Rust
 - **[SQL Pro](https://selvakumarEsra.github.io/claude-skills/skills/language/sql-pro/)**: Advanced SQL, query optimization, window functions, CTEs
 - **[C++ Pro](https://selvakumarEsra.github.io/claude-skills/skills/language/cpp-pro/)**: Modern C++, RAII, templates, performance optimization
-- **[Swift Expert](https://selvakumarEsra.github.io/claude-skills/skills/language/swift-expert/)**: Swift for iOS/macOS, SwiftUI, Combine, Concurrency
 - **[Kotlin Specialist](https://selvakumarEsra.github.io/claude-skills/skills/language/kotlin-specialist/)**: Kotlin for Android, coroutines, Flow, Jetpack Compose
-- **[C# Developer](https://selvakumarEsra.github.io/claude-skills/skills/language/csharp-developer/)**: C# .NET development, LINQ, async/await, modern features
-- **[PHP Pro](https://selvakumarEsra.github.io/claude-skills/skills/language/php-pro/)**: Modern PHP, Laravel patterns, performance optimization
 - **[Java Architect](https://selvakumarEsra.github.io/claude-skills/skills/language/java-architect/)**: Java enterprise, Spring ecosystem, design patterns
 
 ### Backend Frameworks
@@ -25,9 +22,6 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **[Django Expert](https://selvakumarEsra.github.io/claude-skills/skills/backend/django-expert/)**: Building Python web apps with Django/DRF
 - **[FastAPI Expert](https://selvakumarEsra.github.io/claude-skills/skills/backend/fastapi-expert/)**: Building async Python APIs with FastAPI
 - **[Spring Boot Engineer](https://selvakumarEsra.github.io/claude-skills/skills/backend/spring-boot-engineer/)**: Java enterprise applications with Spring Boot
-- **[Laravel Specialist](https://selvakumarEsra.github.io/claude-skills/skills/backend/laravel-specialist/)**: PHP web applications with Laravel
-- **[Rails Expert](https://selvakumarEsra.github.io/claude-skills/skills/backend/rails-expert/)**: Ruby on Rails web applications
-- **[.NET Core Expert](https://selvakumarEsra.github.io/claude-skills/skills/backend/dotnet-core-expert/)**: .NET Core APIs and applications
 
 ### Frontend & Mobile
 - **[React Expert](https://selvakumarEsra.github.io/claude-skills/skills/frontend/react-expert/)**: Building React web applications
@@ -81,15 +75,10 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **[Fine-Tuning Expert](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/fine-tuning-expert/)**: LLM fine-tuning, LoRA, QLoRA, PEFT, model optimization
 
 ### Platform Specialists
-- **[Salesforce Developer](https://selvakumarEsra.github.io/claude-skills/skills/platform/salesforce-developer/)**: Apex, Lightning Web Components, SOQL, governor limits
-- **[Shopify Expert](https://selvakumarEsra.github.io/claude-skills/skills/platform/shopify-expert/)**: Liquid templating, Storefront API, Shopify apps, checkout extensions
-- **[WordPress Pro](https://selvakumarEsra.github.io/claude-skills/skills/platform/wordpress-pro/)**: WordPress themes, plugins, Gutenberg blocks, WooCommerce
 - **[Atlassian MCP](https://selvakumarEsra.github.io/claude-skills/skills/platform/atlassian-mcp/)**: Jira/Confluence integration via MCP, JQL, CQL queries
 
 ### Specialized
 - **[Legacy Modernizer](https://selvakumarEsra.github.io/claude-skills/skills/specialized/legacy-modernizer/)**: Legacy code modernization, migration strategies
-- **[Embedded Systems](https://selvakumarEsra.github.io/claude-skills/skills/specialized/embedded-systems/)**: Embedded development, IoT, firmware, real-time systems
-- **[Game Developer](https://selvakumarEsra.github.io/claude-skills/skills/specialized/game-developer/)**: Game development, game engines, graphics, physics
 
 ### Workflow
 - **[Feature Forge](https://selvakumarEsra.github.io/claude-skills/skills/workflow/feature-forge/)**: Creating new features, gathering requirements, writing specs
@@ -139,11 +128,8 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **TypeScript/JavaScript** → TypeScript Pro / JavaScript Pro
 - **Go Services** → Go Pro
 - **Systems Programming** → Rust Engineer / C++ Pro
-- **iOS/macOS** → Swift Expert
 - **Android** → Kotlin Specialist
-- **Enterprise .NET** → C# Developer
 - **Enterprise Java** → Java Architect
-- **PHP Web** → PHP Pro
 - **Database Work** → SQL Pro
 
 ### Backend Framework
@@ -151,9 +137,6 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **Python Django** → Django Expert
 - **Python Async** → FastAPI Expert
 - **Java Enterprise** → Spring Boot Engineer
-- **PHP Modern** → Laravel Specialist
-- **Ruby Web** → Rails Expert
-- **.NET APIs** → .NET Core Expert
 
 ### Frontend Framework
 - **React Web** → React Expert
@@ -186,9 +169,6 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **Model Fine-Tuning** → Fine-Tuning Expert
 
 ### Platform Development
-- **Salesforce CRM** → Salesforce Developer
-- **Shopify E-commerce** → Shopify Expert
-- **WordPress Sites** → WordPress Pro
 - **Jira/Confluence** → Atlassian MCP
 
 ### Testing
@@ -233,8 +213,6 @@ Common combinations for maximum effectiveness:
 ### Mobile Development
 - React Native Expert / Flutter Expert + API Designer + DevOps Engineer
 
-### Game Development
-- Game Developer + C++ Pro + Performance Optimization + Graphics Programming
 
 ### Legacy Migration
 - Legacy Modernizer + Architecture Designer + Language Specialists + Test Master + Security Reviewer
@@ -242,23 +220,14 @@ Common combinations for maximum effectiveness:
 ### Platform Engineering
 - DevOps Engineer + Kubernetes Specialist + Terraform Engineer + Monitoring Expert + SRE Engineer
 
-### Embedded/IoT
-- Embedded Systems + Rust Engineer / C++ Pro + Security Reviewer
-
 ### Data & ML Pipeline
 - Pandas Pro + Spark Engineer + ML Pipeline + Monitoring Expert
 
 ### AI/LLM Development
 - Prompt Engineer + RAG Architect + Fine-Tuning Expert + Python Pro
 
-### E-commerce Platform
-- Shopify Expert + React Expert + API Designer + DevOps Engineer
-
 ### Decision Validation
 - Common Ground (surface assumptions) + The Fool (stress-test the decision) + Architecture Designer (document refined decision)
-
-### CRM Development
-- Salesforce Developer + API Designer + Security Reviewer + Test Master
 
 ### Enterprise Java
 - Java Architect + Spring Boot Engineer + Microservices Architect + DevOps Engineer
@@ -283,7 +252,6 @@ Common combinations for maximum effectiveness:
 - "Build a Next.js app with server components" → Next.js Developer + TypeScript Pro
 - "Implement WebSocket chat" → WebSocket Engineer + API Designer
 - "Terraform setup for AWS multi-region" → Terraform Engineer + Cloud Architect
-- "Build a game engine in C++" → Game Developer + C++ Pro
 - "Modernize legacy Java monolith" → Legacy Modernizer + Java Architect + Microservices Architect
 
 ### Language-Specific
@@ -291,15 +259,11 @@ Common combinations for maximum effectiveness:
 - "TypeScript generics for API client" → TypeScript Pro
 - "Python type hints and protocols" → Python Pro
 - "Go channels and concurrency patterns" → Go Pro
-- "SwiftUI reactive patterns" → Swift Expert
 - "Kotlin coroutines best practices" → Kotlin Specialist
 - "Advanced SQL window functions" → SQL Pro
 
 ### Framework-Specific
 - "Spring Boot microservice architecture" → Spring Boot Engineer
-- "Laravel API with queues" → Laravel Specialist
-- "Rails with Hotwire and Turbo" → Rails Expert
-- ".NET Core minimal APIs" → .NET Core Expert
 - "Vue 3 Composition API patterns" → Vue Expert
 - "Angular signals and standalone components" → Angular Architect
 
@@ -317,7 +281,6 @@ Common combinations for maximum effectiveness:
 - "Help me implement RBAC in NestJS" → NestJS Expert + Secure Code Guardian
 - "Set up SRE practices and SLOs" → SRE Engineer + Monitoring Expert
 - "Design MCP server for tool integration" → MCP Developer
-- "Embedded firmware for IoT device" → Embedded Systems + Rust Engineer
 
 ### Data & ML
 - "Clean and transform CSV data with pandas" → Pandas Pro
@@ -328,7 +291,4 @@ Common combinations for maximum effectiveness:
 - "Fine-tune Llama 2 with LoRA" → Fine-Tuning Expert
 
 ### Platform Development
-- "Build Lightning Web Component for Salesforce" → Salesforce Developer
-- "Create custom Shopify checkout extension" → Shopify Expert
-- "Develop WordPress plugin with Gutenberg blocks" → WordPress Pro
 - "Query Jira issues via MCP server" → Atlassian MCP

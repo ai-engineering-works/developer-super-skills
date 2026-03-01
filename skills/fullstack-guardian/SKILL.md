@@ -10,7 +10,7 @@ metadata:
   role: expert
   scope: implementation
   output-format: code
-  related-skills: feature-forge, test-master, devops-engineer,architecture-designer,code-documenter,debugging-wizard,django-expert,dotnet-core-expert,fastapi-expert,flutter-expert,java-architect,javascript-pro,laravel-specialist,nestjs-expert,php-pro,rails-expert,react-expert,secure-code-guardian,spec-miner,typescript-pro,vue-expert,wordpress-pro
+  related-skills: feature-forge, test-master, devops-engineer, architecture-designer, code-documenter, debugging-wizard, django-expert, fastapi-expert, flutter-expert, java-architect, javascript-pro, nestjs-expert, react-expert, secure-code-guardian, spec-miner, typescript-pro, vue-expert
 ---
 
 # Fullstack Guardian
