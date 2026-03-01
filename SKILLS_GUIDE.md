@@ -92,6 +92,11 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 - **[Game Developer](https://selvakumarEsra.github.io/claude-skills/skills/specialized/game-developer/)**: Game development, game engines, graphics, physics
 
 ### Workflow
+- **[Feature Forge](https://selvakumarEsra.github.io/claude-skills/skills/workflow/feature-forge/)**: Creating new features, gathering requirements, writing specs
+- **[Spec Miner](https://selvakumarEsra.github.io/claude-skills/skills/workflow/spec-miner/)**: Analyzing existing code, reverse-engineering specifications
+- **[Brainstorming](https://selvakumarEsra.github.io/claude-skills/skills/workflow/brainstorming/)**: Exploring user intent, designing features before implementation
+- **[Writing Plans](https://selvakumarEsra.github.io/claude-skills/skills/workflow/writing-plans/)**: Creating implementation plans from specs
+- **[Writing Skills](https://selvakumarEsra.github.io/claude-skills/skills/workflow/writing-skills/)**: Creating and testing Agent Skills using TDD
 - **[Debugging Wizard](https://selvakumarEsra.github.io/claude-skills/skills/quality/debugging-wizard/)**: Systematic debugging across all languages
 - **[Fullstack Guardian](https://selvakumarEsra.github.io/claude-skills/skills/security/fullstack-guardian/)**: Implementing features across full stack
 - **[The Fool](https://selvakumarEsra.github.io/claude-skills/skills/workflow/the-fool/)**: Challenge ideas and decisions with 5 structured reasoning modes
@@ -99,14 +104,15 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 ## Skill Workflows
 
 ### New Feature Development
-1. **Feature Forge** - Define requirements and spec
-2. **Architecture Designer** - Design system architecture (if complex)
-3. **Fullstack Guardian** + Framework Skills - Implement
-4. **Test Master** + **Playwright Expert** - Test comprehensively
-5. **Code Reviewer** - Review code
-6. **Security Reviewer** - Security review
-7. **DevOps Engineer** - Deploy
-8. **Monitoring Expert** - Add observability
+1. **Brainstorming** - Explore user intent, design approach, get approval
+2. **Writing Plans** - Create detailed implementation plan from approved design
+3. **Architecture Designer** - Design system architecture (if complex)
+4. **Fullstack Guardian** + Framework Skills - Implement following plan
+5. **Test Master** + **Playwright Expert** - Test comprehensively
+6. **Code Reviewer** - Review code
+7. **Security Reviewer** - Security review
+8. **DevOps Engineer** - Deploy
+9. **Monitoring Expert** - Add observability
 
 ### Bug Fixing
 1. **Debugging Wizard** - Identify root cause

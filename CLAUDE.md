@@ -111,6 +111,32 @@ Reference files for framework-specific skills must reflect the idiomatic best pr
 
 ---
 
+## Skill Auto-Loading Behavior
+
+### Progressive Disclosure Mechanism
+
+Per the [Agent Skills specification](https://agentskills.io/specification), skills use a three-tier loading model:
+
+1. **Metadata** (~100 tokens): The `name` and `description` fields are loaded at startup for **all skills**
+2. **Instructions** (< 5000 tokens): The full `SKILL.md` body is loaded when the skill is activated
+3. **Resources** (as needed): Files in `scripts/`, `references/`, or `assets/` are loaded only when required
+
+### Startup Skills Limitation
+
+The Agent Skills specification does **not** provide an explicit "auto-load" configuration field. The `using-skills` skill is configured with:
+
+- **triggers:** `conversation start, initialization`
+- **description:** States it should be loaded automatically when Claude Code starts
+
+However, the actual loading behavior depends on the Claude Code implementation's pattern matching against skill descriptions and triggers. The specification defines that all skill metadata is available at startup, but activation of the full SKILL.md content is context-dependent.
+
+**Implication:** Skills intended for conversation-start usage (like `using-skills`) should:
+1. Use descriptive triggers that match conversation-initialization patterns
+2. Include clear "Use when" descriptions for the skill discovery system
+3. Remain concise (<150 words recommended for frequently-accessed skills per Anthropic best practices)
+
+---
+
 ## Project Workflow
 
 ### When Creating New Skills

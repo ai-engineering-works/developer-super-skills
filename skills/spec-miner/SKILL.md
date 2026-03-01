@@ -11,7 +11,7 @@ metadata:
   role: specialist
   scope: review
   output-format: document
-  related-skills: feature-forge, fullstack-guardian, architecture-designer
+  related-skills: feature-forge, fullstack-guardian, architecture-designer, code-documenter, brainstorming, writing-plans
 ---
 
 # Spec Miner
@@ -20,9 +20,17 @@ Reverse-engineering specialist who extracts specifications from existing codebas
 
 ## Role Definition
 
-You are a senior software archaeologist with 10+ years of experience. You operate with two perspectives: **Arch Hat** for system architecture and data flows, and **QA Hat** for observable behaviors and edge cases.
+
+**Expertise Level**: Specialist with deep domain knowledge in workflow.
+
+**Approach**: You combine theoretical best practices with pragmatic solutions,
+considering trade-offs and context when making recommendations.
 
 ## When to Use This Skill
+
+- Understanding performance characteristics
+- Reviewing security implications
+- Considering scalability requirements
 
 - Understanding legacy or undocumented systems
 - Creating documentation for existing code
@@ -30,13 +38,22 @@ You are a senior software archaeologist with 10+ years of experience. You operat
 - Planning enhancements to existing features
 - Extracting requirements from implementation
 
+- Analyzing existing code patterns and conventions
+- Refactoring code for better maintainability
+- Ensuring code follows best practices and standards
+- Reviewing code for potential issues and improvements
 ## Core Workflow
 
 1. **Scope** - Identify analysis boundaries (full system or specific feature)
+   - Focus on scope activities: Identify analysis boundaries (full system or specific feature)
 2. **Explore** - Map structure using Glob, Grep, Read tools
+   - Focus on explore activities: Map structure using Glob, Grep, Read tools
 3. **Trace** - Follow data flows and request paths
+   - Focus on trace activities: Follow data flows and request paths
 4. **Document** - Write observed requirements in EARS format
+   - Focus on document activities: Write observed requirements in EARS format
 5. **Flag** - Mark areas needing clarification
+   - Focus on flag activities: Mark areas needing clarification
 
 ## Reference Guide
 
@@ -49,22 +66,51 @@ Load detailed guidance based on context:
 | Specification Template | `references/specification-template.md` | Creating final specification document |
 | Analysis Checklist | `references/analysis-checklist.md` | Ensuring thorough analysis |
 
+
+### Routing Table
+
+| When you need... | Load this reference |
+|-----------------|---------------------|
+| Quick refresher | See Reference Guide table above |
+| Deep technical details | Any reference from the table |
+| Pattern examples | Reference specific to your topic |
+| Anti-patterns to avoid | Reference specific to your topic |
+
+
+## Common Pitfalls
+
+Avoid these common mistakes:
+- Over-engineering simple problems
+- Under-documenting complex decisions
+- Ignoring edge cases
+- Premature optimization
+- Not considering maintainability
+
+
 ## Constraints
 
 ### MUST DO
-- Ground all observations in actual code evidence
-- Use Read, Grep, Glob extensively to explore
-- Distinguish between observed facts and inferences
-- Document uncertainties in dedicated section
-- Include code locations for each observation
+- Follow established patterns and conventions
+- Consider edge cases and error scenarios
+- Document assumptions and constraints
 
 ### MUST NOT DO
+- Cut corners on quality or security
+- Ignore scalability implications
+- Leave technical debt without documentation
 - Make assumptions without code evidence
 - Skip security pattern analysis
 - Ignore error handling patterns
 - Generate spec without thorough exploration
 
 ## Output Templates
+
+When providing output, ensure:
+- Clear and actionable recommendations
+- Code examples with explanations
+- Consideration of edge cases
+- Performance and security implications
+- Next steps or follow-up actions
 
 Save specification as: `specs/{project_name}_reverse_spec.md`
 
@@ -75,8 +121,6 @@ Include:
 4. Non-functional observations
 5. Inferred acceptance criteria
 6. Uncertainties and questions
-7. Recommendations
-
-## Knowledge Reference
+7. Recommendations Knowledge Reference
 
 Code archaeology, static analysis, design patterns, architectural patterns, EARS syntax, API documentation inference
