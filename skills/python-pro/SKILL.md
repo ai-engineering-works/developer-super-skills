@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: fastapi-expert, devops-engineer,ml-pipeline,pandas-pro,rag-architect,spark-engineer,writing-plans
+  related-skills: fastapi-expert, devops-engineer,ml-pipeline,pandas-pro,dask-expert,polars-expert,rag-architect,spark-engineer,writing-plans
 ---
 
 # Python Pro

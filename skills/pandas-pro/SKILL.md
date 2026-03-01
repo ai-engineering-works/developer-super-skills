@@ -10,7 +10,7 @@ metadata:
   role: expert
   scope: implementation
   output-format: code
-  related-skills: python-pro
+  related-skills: python-pro, dask-expert, polars-expert
 ---
 
 # Pandas Pro

@@ -68,6 +68,8 @@ A guide for choosing the right skill for your task. For installation, see [Quick
 
 ### Data & Machine Learning
 - **[Pandas Pro](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/pandas-pro/)**: DataFrame manipulation, data cleaning, aggregation, time series
+- **[Dask Expert](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/dask-expert/)**: Parallel computing, distributed processing, scaling pandas workflows to big data
+- **[Polars Expert](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/polars-expert/)**: High-performance DataFrame operations, memory-efficient processing, lazy evaluation
 - **[Spark Engineer](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/spark-engineer/)**: Apache Spark, PySpark, distributed data processing, Spark SQL
 - **[ML Pipeline](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/ml-pipeline/)**: ML pipelines, MLflow, Kubeflow, feature stores, experiment tracking
 - **[Prompt Engineer](https://selvakumarEsra.github.io/claude-skills/skills/data-ml/prompt-engineer/)**: LLM prompt design, chain-of-thought, few-shot learning, evaluation

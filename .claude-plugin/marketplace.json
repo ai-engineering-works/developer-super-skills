@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Comprehensive skill pack for full-stack developers covering frameworks, workflows, and security",
-    "version": "0.4.10"
+    "version": "0.4.11"
   },
   "plugins": [
     {
       "name": "fullstack-dev-skills",
       "source": "./",
-      "description": "59 specialized skills for full-stack development: 8 language experts (Python, TypeScript, Go, Rust, C++, Kotlin, Java, SQL, JavaScript), 4 backend frameworks, 6 frontend/mobile, plus infrastructure, DevOps, security, and testing skills. Includes 9 project workflow commands for epic planning, discovery, execution, and retrospectives.",
-      "version": "0.4.10",
+      "description": "61 specialized skills for full-stack development: 8 language experts (Python, TypeScript, Go, Rust, C++, Kotlin, Java, SQL, JavaScript), 4 backend frameworks, 6 frontend/mobile, plus infrastructure, DevOps, security, and testing skills. Includes Dask and Polars experts for big data processing. Includes 9 project workflow commands for epic planning, discovery, execution, and retrospectives.",
+      "version": "0.4.11",
       "author": {
         "name": "selvakumarEsra",
         "email": "github@selvakumarEsra"
@@ -43,6 +43,8 @@
         "django",
         "fastapi",
         "spring-boot",
+        "dask",
+        "polars",
         "kubernetes",
         "terraform",
         "graphql",
