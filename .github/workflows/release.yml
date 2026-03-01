@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Extract version from tag
         id: version
@@ -49,6 +51,11 @@ jobs:
           echo "NOTES<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create source code archives
+        run: |
+          git archive --format=zip --prefix=release/ -o source-code.zip HEAD
+          git archive --format=tar.gz --prefix=release/ -o source-code.tar.gz HEAD
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -86,5 +93,10 @@ jobs:
             ---
 
             **Documentation:** https://selvakumarEsra.github.io/claude-skills/
+          files: |
+            source-code.zip
+            source-code.tar.gz
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
