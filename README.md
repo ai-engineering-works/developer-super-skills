@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/selvakumarEsra/claude-skills"><img src="https://img.shields.io/badge/version-0.4.9-blue.svg?style=for-the-badge" alt="Version"/></a>
+  <a href="https://github.com/selvakumarEsra/claude-skills"><img src="https://img.shields.io/badge/version-0.4.11-blue.svg?style=for-the-badge" alt="Version"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License"/></a>
   <a href="https://github.com/selvakumarEsra/claude-skills"><img src="https://img.shields.io/badge/Claude_Code-Plugin-purple.svg?style=for-the-badge" alt="Claude Code"/></a>
   <a href="https://github.com/selvakumarEsra/claude-skills/stargazers"><img src="https://img.shields.io/github/stars/selvakumarEsra/claude-skills?style=for-the-badge&color=yellow" alt="Stars"/></a>
@@ -71,8 +71,7 @@ Surface and validate Claude's hidden assumptions about your project with `/commo
 
 ## Project Workflow
 
-<!-- WORKFLOW_COUNT -->9<!-- /WORKFLOW_COUNT --> workflow commands manage epics from discovery through retrospectives, integrating with Jira and Confluence. See <a href="docs/WORKFLOW_COMMANDS.md"><strong>Workflow Commands Reference</strong></a> for the full command reference and lifecycle diagrams.
-&nbsp;
+<!-- WORKFLOW_COUNT -->9<!-- /WORKFLOW_COUNT --> workflow commands manage epics from discovery through retrospectives, integrating with Jira and Confluence. See [**Workflow Commands Reference**](docs/WORKFLOW_COMMANDS.md) for the full command reference and lifecycle diagrams.
 
 > [!TIP]
 > **Setup:** Workflow commands require an Atlassian MCP server. See the [**Atlassian MCP Setup Guide**](docs/ATLASSIAN_MCP_SETUP.md).

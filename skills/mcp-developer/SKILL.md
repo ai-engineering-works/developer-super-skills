@@ -1,55 +1,30 @@
 ---
 name: mcp-developer
-description: Use when building MCP servers or clients that connect AI systems with external tools and data sources. Invoke for MCP protocol compliance, TypeScript/Python SDKs, resource providers, tool functions.
+description: Use when building, debugging, or extending MCP servers or clients that connect AI systems with external tools and data sources. Invoke to implement tool handlers, configure resource providers, set up stdio/HTTP/SSE transport layers, validate schemas with Zod or Pydantic, debug protocol compliance issues, or scaffold complete MCP server/client projects using TypeScript or Python SDKs.
 license: MIT
 metadata:
-  author: selvakumaresra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: api-architecture
   triggers: MCP, Model Context Protocol, MCP server, MCP client, Claude integration, AI tools, context protocol, JSON-RPC
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: fastapi-expert, typescript-pro, security-reviewer, devops-engineer,atlassian-mcp
+  related-skills: fastapi-expert, typescript-pro, security-reviewer, devops-engineer
 ---
 
 # MCP Developer
 
 Senior MCP (Model Context Protocol) developer with deep expertise in building servers and clients that connect AI systems with external tools and data sources.
 
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in api-architecture.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Building MCP servers for data source integration
-- Implementing tool functions for AI assistants
-- Creating resource providers with URI schemes
-- Setting up MCP clients for Claude integration
-- Debugging protocol compliance issues
-- Optimizing MCP performance and security
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
-1. **Analyze requirements** - Identify data sources, tools needed, client apps
-   - Focus on analyze requirements activities: Identify data sources, tools needed, client apps
-2. **Design protocol** - Define resources, tools, prompts, schemas
-   - Focus on design protocol activities: Define resources, tools, prompts, schemas
-3. **Implement** - Build server/client with SDK, add security controls
-   - Focus on implement activities: Build server/client with SDK, add security controls
-4. **Test** - Verify protocol compliance, performance, error handling
-   - Focus on test activities: Verify protocol compliance, performance, error handling
-5. **Deploy** - Package, configure, monitor in production
-   - Focus on deploy activities: Package, configure, monitor in production
+1. **Analyze requirements** — Identify data sources, tools needed, and client apps
+2. **Initialize project** — `npx @modelcontextprotocol/create-server my-server` (TypeScript) or `pip install mcp` + scaffold (Python)
+3. **Design protocol** — Define resource URIs, tool schemas (Zod/Pydantic), and prompt templates
+4. **Implement** — Register tools and resource handlers; configure transport (stdio/SSE/HTTP)
+5. **Test** — Run `npx @modelcontextprotocol/inspector` to verify protocol compliance interactively; confirm tools appear, schemas accept valid inputs, and error responses are well-formed JSON-RPC 2.0. **Feedback loop:** if schema validation fails → inspect Zod/Pydantic error output → fix schema definition → re-run inspector. If a tool call returns a malformed response → check transport serialisation → fix handler → re-test.
+6. **Deploy** — Package, add auth/rate-limiting, configure env vars, monitor
 
 ## Reference Guide
 
@@ -63,38 +38,93 @@ Load detailed guidance based on context:
 | Tools | `references/tools.md` | Tool definitions, schemas, execution |
 | Resources | `references/resources.md` | Resource providers, URIs, templates |
 
+## Minimal Working Example
 
-### Routing Table
+### TypeScript — Tool with Zod Validation
 
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
+```typescript
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
 
+const server = new McpServer({ name: "my-server", version: "1.1.0" });
 
-## Common Pitfalls
+// Register a tool with validated input schema
+server.tool(
+  "get_weather",
+  "Fetch current weather for a location",
+  {
+    location: z.string().min(1).describe("City name or coordinates"),
+    units: z.enum(["celsius", "fahrenheit"]).default("celsius"),
+  },
+  async ({ location, units }) => {
+    // Implementation: call external API, transform response
+    const data = await fetchWeather(location, units); // your fetch logic
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+    };
+  }
+);
 
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
+// Register a resource provider
+server.resource(
+  "config://app",
+  "Application configuration",
+  async (uri) => ({
+    contents: [{ uri: uri.href, text: JSON.stringify(getConfig()), mimeType: "application/json" }],
+  })
+);
 
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+### Python — Tool with Pydantic Validation
+
+```python
+from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, Field
+
+mcp = FastMCP("my-server")
+
+class WeatherInput(BaseModel):
+    location: str = Field(..., min_length=1, description="City name or coordinates")
+    units: str = Field("celsius", pattern="^(celsius|fahrenheit)$")
+
+@mcp.tool()
+async def get_weather(location: str, units: str = "celsius") -> str:
+    """Fetch current weather for a location."""
+    data = await fetch_weather(location, units)  # your fetch logic
+    return str(data)
+
+@mcp.resource("config://app")
+async def app_config() -> str:
+    """Expose application configuration as a resource."""
+    return json.dumps(get_config())
+
+if __name__ == "__main__":
+    mcp.run()  # defaults to stdio transport
+```
+
+**Expected tool call flow:**
+```
+Client → { "method": "tools/call", "params": { "name": "get_weather", "arguments": { "location": "Berlin" } } }
+Server → { "result": { "content": [{ "type": "text", "text": "{\"temp\": 18, \"units\": \"celsius\"}" }] } }
+```
 
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Implement JSON-RPC 2.0 protocol correctly
+- Validate all inputs with schemas (Zod/Pydantic)
+- Use proper transport mechanisms (stdio/HTTP/SSE)
+- Implement comprehensive error handling
+- Add authentication and authorization
+- Log protocol messages for debugging
+- Test protocol compliance thoroughly
+- Document server capabilities
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Skip input validation on tool inputs
 - Expose sensitive data in resource content
 - Ignore protocol version compatibility
@@ -106,17 +136,8 @@ Avoid these common mistakes:
 
 ## Output Templates
 
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
-
 When implementing MCP features, provide:
 1. Server/client implementation file
 2. Schema definitions (tools, resources, prompts)
 3. Configuration file (transport, auth, etc.)
-4. Brief explanation of design decisions Knowledge Reference
-
-Model Context Protocol (MCP), JSON-RPC 2.0, TypeScript SDK (@modelcontextprotocol/sdk), Python SDK (mcp), Zod schemas, Pydantic validation, stdio transport, SSE transport, resource URIs, tool functions, prompt templates, authentication, rate limiting
+4. Brief explanation of design decisions

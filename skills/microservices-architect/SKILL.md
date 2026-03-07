@@ -1,59 +1,36 @@
 ---
 name: microservices-architect
-description: Use when designing distributed systems, decomposing monoliths, or implementing microservices patterns. Invoke for service boundaries, DDD, saga patterns, event sourcing, service mesh, distributed tracing.
+description: Designs distributed system architectures, decomposes monoliths into bounded-context services, recommends communication patterns, and produces service boundary diagrams and resilience strategies. Use when designing distributed systems, decomposing monoliths, or implementing microservices patterns — including service boundaries, DDD, saga patterns, event sourcing, CQRS, service mesh, or distributed tracing.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: api-architecture
   triggers: microservices, service mesh, distributed systems, service boundaries, domain-driven design, event sourcing, CQRS, saga pattern, Kubernetes microservices, Istio, distributed tracing
   role: architect
   scope: system-design
   output-format: architecture
-  related-skills: devops-engineer, kubernetes-specialist, graphql-architect, architecture-designer, monitoring-expert,cloud-architect,golang-pro,spring-boot-engineer
+  related-skills: devops-engineer, kubernetes-specialist, graphql-architect, architecture-designer, monitoring-expert
 ---
 
 # Microservices Architect
 
 Senior distributed systems architect specializing in cloud-native microservices architectures, resilience patterns, and operational excellence.
 
-## Role Definition
-
-
-**Expertise Level**: Architect with deep domain knowledge in api-architecture.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Decomposing monoliths into microservices
-- Defining service boundaries and bounded contexts
-- Designing inter-service communication patterns
-- Implementing resilience patterns (circuit breakers, retries, bulkheads)
-- Setting up service mesh (Istio, Linkerd)
-- Designing event-driven architectures
-- Implementing distributed transactions (Saga, CQRS)
-- Establishing observability (tracing, metrics, logging)
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
-1. **Domain Analysis** - Apply DDD to identify bounded contexts and service boundaries
-   - Focus on domain analysis activities: Apply DDD to identify bounded contexts and service boundaries
-2. **Communication Design** - Choose sync/async patterns, protocols (REST, gRPC, events)
-   - Focus on communication design activities: Choose sync/async patterns, protocols (REST, gRPC, events)
-3. **Data Strategy** - Database per service, event sourcing, eventual consistency
-   - Focus on data strategy activities: Database per service, event sourcing, eventual consistency
-4. **Resilience** - Circuit breakers, retries, timeouts, bulkheads, fallbacks
-   - Focus on resilience activities: Circuit breakers, retries, timeouts, bulkheads, fallbacks
-5. **Observability** - Distributed tracing, correlation IDs, centralized logging
-   - Focus on observability activities: Distributed tracing, correlation IDs, centralized logging
-6. **Deployment** - Container orchestration, service mesh, progressive delivery
-   - Focus on deployment activities: Container orchestration, service mesh, progressive delivery
+1. **Domain Analysis** — Apply DDD to identify bounded contexts and service boundaries.
+   - *Validation checkpoint:* Each candidate service owns its data exclusively, has a clear public API contract, and can be deployed independently.
+2. **Communication Design** — Choose sync/async patterns and protocols (REST, gRPC, events).
+   - *Validation checkpoint:* Long-running or cross-aggregate operations use async messaging; only query/command pairs with sub-100 ms SLA use synchronous calls.
+3. **Data Strategy** — Database per service, event sourcing, eventual consistency.
+   - *Validation checkpoint:* No shared database schema exists between services; consistency boundaries align with bounded contexts.
+4. **Resilience** — Circuit breakers, retries, timeouts, bulkheads, fallbacks.
+   - *Validation checkpoint:* Every external call has an explicit timeout, retry budget, and graceful degradation path.
+5. **Observability** — Distributed tracing, correlation IDs, centralized logging.
+   - *Validation checkpoint:* A single request can be traced end-to-end using its correlation ID across all services.
+6. **Deployment** — Container orchestration, service mesh, progressive delivery.
+   - *Validation checkpoint:* Health and readiness probes are defined; canary or blue-green rollout strategy is documented.
 
 ## Reference Guide
 
@@ -67,38 +44,103 @@ Load detailed guidance based on context:
 | Data Management | `references/data.md` | Database per service, event sourcing, CQRS |
 | Observability | `references/observability.md` | Distributed tracing, correlation IDs, metrics |
 
+## Implementation Examples
 
-### Routing Table
+### Correlation ID Middleware (Node.js / Express)
+```js
+const { v4: uuidv4 } = require('uuid');
 
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
+function correlationMiddleware(req, res, next) {
+  req.correlationId = req.headers['x-correlation-id'] || uuidv4();
+  res.setHeader('x-correlation-id', req.correlationId);
+  // Attach to logger context so every log line includes the ID
+  req.log = logger.child({ correlationId: req.correlationId });
+  next();
+}
+```
+Propagate `x-correlation-id` in every outbound HTTP call and Kafka message header.
 
+### Circuit Breaker (Python / `pybreaker`)
+```python
+import pybreaker
 
-## Common Pitfalls
+# Opens after 5 failures; resets after 30 s in half-open state
+breaker = pybreaker.CircuitBreaker(fail_max=5, reset_timeout=30)
 
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
+@breaker
+def call_inventory_service(order_id: str):
+    response = requests.get(f"{INVENTORY_URL}/stock/{order_id}", timeout=2)
+    response.raise_for_status()
+    return response.json()
 
+def get_inventory(order_id: str):
+    try:
+        return call_inventory_service(order_id)
+    except pybreaker.CircuitBreakerError:
+        return {"status": "unavailable", "fallback": True}
+```
+
+### Saga Orchestration Skeleton (TypeScript)
+```ts
+// Each step defines execute() and compensate() so rollback is automatic.
+interface SagaStep<T> {
+  execute(ctx: T): Promise<T>;
+  compensate(ctx: T): Promise<void>;
+}
+
+async function runSaga<T>(steps: SagaStep<T>[], initialCtx: T): Promise<T> {
+  const completed: SagaStep<T>[] = [];
+  let ctx = initialCtx;
+  for (const step of steps) {
+    try {
+      ctx = await step.execute(ctx);
+      completed.push(step);
+    } catch (err) {
+      for (const done of completed.reverse()) {
+        await done.compensate(ctx).catch(console.error);
+      }
+      throw err;
+    }
+  }
+  return ctx;
+}
+
+// Usage: order creation saga
+const orderSaga = [reserveInventoryStep, chargePaymentStep, scheduleShipmentStep];
+await runSaga(orderSaga, { orderId, customerId, items });
+```
+
+### Health & Readiness Probe (Kubernetes)
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 15
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
+`/health/live` — returns 200 if the process is running.  
+`/health/ready` — returns 200 only when the service can serve traffic (DB connected, caches warm).
 
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Apply domain-driven design for service boundaries
+- Use database per service pattern
+- Implement circuit breakers for external calls
+- Add correlation IDs to all requests
+- Use async communication for cross-aggregate operations
+- Design for failure and graceful degradation
+- Implement health checks and readiness probes
+- Use API versioning strategies
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Create distributed monoliths
 - Share databases between services
 - Use synchronous calls for long-running operations
@@ -110,18 +152,13 @@ Avoid these common mistakes:
 
 ## Output Templates
 
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
-
 When designing microservices architecture, provide:
 1. Service boundary diagram with bounded contexts
 2. Communication patterns (sync/async, protocols)
 3. Data ownership and consistency model
 4. Resilience patterns for each integration point
-5. Deployment and infrastructure requirements Knowledge Reference
+5. Deployment and infrastructure requirements
+
+## Knowledge Reference
 
 Domain-driven design, bounded contexts, event storming, REST/gRPC, message queues (Kafka, RabbitMQ), service mesh (Istio, Linkerd), Kubernetes, circuit breakers, saga patterns, event sourcing, CQRS, distributed tracing (Jaeger, Zipkin), API gateways, eventual consistency, CAP theorem

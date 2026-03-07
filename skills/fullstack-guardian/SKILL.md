@@ -1,63 +1,30 @@
 ---
 name: fullstack-guardian
-description: Use when implementing features across frontend and backend, building APIs with UI, or creating end-to-end data flows. Invoke for feature implementation, API development, UI building, cross-stack work.
+description: Builds security-focused full-stack web applications by implementing integrated frontend and backend components with layered security at every level. Covers the complete stack from database to UI, enforcing auth, input validation, output encoding, and parameterized queries across all layers. Use when implementing features across frontend and backend, building REST APIs with corresponding UI, connecting frontend components to backend endpoints, creating end-to-end data flows from database to UI, or implementing CRUD operations with UI forms. Distinct from frontend-only, backend-only, or API-only skills in that it simultaneously addresses all three perspectives—Frontend, Backend, and Security—within a single implementation workflow. Invoke for full-stack feature work, web app development, authenticated API routes with views, microservices, real-time features, monorepo architecture, or technology selection decisions.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: security
   triggers: fullstack, implement feature, build feature, create API, frontend and backend, full stack, new feature, implement, microservices, websocket, real-time, deployment pipeline, monorepo, architecture decision, technology selection, end-to-end
   role: expert
   scope: implementation
   output-format: code
-  related-skills: feature-forge, test-master, devops-engineer, architecture-designer, code-documenter, debugging-wizard, django-expert, fastapi-expert, flutter-expert, java-architect, javascript-pro, nestjs-expert, react-expert, secure-code-guardian, spec-miner, typescript-pro, vue-expert
+  related-skills: feature-forge, test-master, devops-engineer
 ---
 
 # Fullstack Guardian
 
 Security-focused full-stack developer implementing features across the entire application stack.
 
-## Role Definition
-
-
-**Expertise Level**: Expert with deep domain knowledge in security.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Debugging complex issues
-- Optimizing performance
-- Handling edge cases
-- Ensuring security best practices
-
-- Understanding performance characteristics
-- Reviewing security implications
-- Considering scalability requirements
-
-- Implementing new features across frontend and backend
-- Building APIs with corresponding UI
-- Creating data flows from database to UI
-- Features requiring authentication/authorization
-- Cross-cutting concerns (logging, caching, validation)
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
 1. **Gather requirements** - Understand feature scope and acceptance criteria
-   - Focus on gather requirements activities: Understand feature scope and acceptance criteria
 2. **Design solution** - Consider all three perspectives (Frontend/Backend/Security)
-   - Focus on design solution activities: Consider all three perspectives (Frontend/Backend/Security)
 3. **Write technical design** - Document approach in `specs/{feature}_design.md`
-   - Focus on write technical design activities: Document approach in `specs/{feature}_design.md`
-4. **Implement** - Build incrementally, testing as you go
-   - Focus on implement activities: Build incrementally, testing as you go
-5. **Hand off** - Pass to Test Master for QA, DevOps for deployment
-   - Focus on hand off activities: Pass to Test Master for QA, DevOps for deployment
+4. **Security checkpoint** - Run through `references/security-checklist.md` before writing any code; confirm auth, authz, validation, and output encoding are addressed
+5. **Implement** - Build incrementally, testing each component as you go
+6. **Hand off** - Pass to Test Master for QA, DevOps for deployment
 
 ## Reference Guide
 
@@ -76,44 +43,58 @@ Load detailed guidance based on context:
 | Architecture Decisions | `references/architecture-decisions.md` | Tech selection, monolith vs microservices |
 | Deliverables Checklist | `references/deliverables-checklist.md` | Completing features, preparing handoff |
 
-
-### Routing Table
-
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
-
-
-## Common Pitfalls
-
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
-
-
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Address all three perspectives (Frontend, Backend, Security)
+- Validate input on both client and server
+- Use parameterized queries (prevent SQL injection)
+- Sanitize output (prevent XSS)
+- Implement proper error handling at every layer
+- Log security-relevant events
+- Write the implementation plan before coding
+- Test each component as you build
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Skip security considerations
 - Trust client-side validation alone
 - Expose sensitive data in API responses
 - Hardcode credentials or secrets
 - Implement features without acceptance criteria
 - Skip error handling for "happy path only"
+
+## Three-Perspective Example
+
+A minimal authenticated endpoint illustrating all three layers:
+
+**[Backend]** — Authenticated route with parameterized query and scoped response:
+```python
+@router.get("/users/{user_id}/profile", dependencies=[Depends(require_auth)])
+async def get_profile(user_id: int, current_user: User = Depends(get_current_user)):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    # Parameterized query — no raw string interpolation
+    row = await db.fetchone("SELECT id, name, email FROM users WHERE id = ?", (user_id,))
+    if not row:
+        raise HTTPException(status_code=404, detail="Not found")
+    return ProfileResponse(**row)   # explicit schema — no password/token leakage
+```
+
+**[Frontend]** — Component calls the endpoint and handles errors gracefully:
+```typescript
+async function fetchProfile(userId: number): Promise<Profile> {
+  const res = await apiFetch(`/users/${userId}/profile`);   // apiFetch attaches auth header
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+// Client-side input guard (never the only guard)
+if (!Number.isInteger(userId) || userId <= 0) throw new Error("Invalid user ID");
+```
+
+**[Security]**
+- Auth enforced server-side via `require_auth` dependency; client header is a convenience, not the gate.
+- Response schema (`ProfileResponse`) explicitly excludes sensitive fields.
+- 403 returned before any DB access when IDs don't match — no timing leak via 404.
 
 ## Output Templates
 

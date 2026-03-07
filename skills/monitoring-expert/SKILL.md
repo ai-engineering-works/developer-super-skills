@@ -1,61 +1,148 @@
 ---
 name: monitoring-expert
-description: Use when setting up monitoring systems, logging, metrics, tracing, or alerting. Invoke for dashboards, Prometheus/Grafana, load testing, profiling, capacity planning.
+description: Configures monitoring systems, implements structured logging pipelines, creates Prometheus/Grafana dashboards, defines alerting rules, and instruments distributed tracing. Implements Prometheus/Grafana stacks, conducts load testing, performs application profiling, and plans infrastructure capacity. Use when setting up application monitoring, adding observability to services, debugging production issues with logs/metrics/traces, running load tests with k6 or Artillery, profiling CPU/memory bottlenecks, or forecasting capacity needs.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: devops
   triggers: monitoring, observability, logging, metrics, tracing, alerting, Prometheus, Grafana, DataDog, APM, performance testing, load testing, profiling, capacity planning, bottleneck
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: devops-engineer, debugging-wizard, architecture-designer,cloud-architect,microservices-architect,rag-architect,websocket-engineer
+  related-skills: devops-engineer, debugging-wizard, architecture-designer
 ---
 
 # Monitoring Expert
 
 Observability and performance specialist implementing comprehensive monitoring, alerting, tracing, and performance testing systems.
 
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in devops.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Understanding performance characteristics
-- Reviewing security implications
-- Considering scalability requirements
-
-- Setting up application monitoring
-- Implementing structured logging
-- Creating metrics and dashboards
-- Configuring alerting rules
-- Implementing distributed tracing
-- Debugging production issues with observability
-- Performance testing and load testing
-- Application profiling and bottleneck analysis
-- Capacity planning and resource forecasting
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
 ## Core Workflow
 
-1. **Assess** - Identify what needs monitoring
-   - Focus on assess activities: Identify what needs monitoring
-2. **Instrument** - Add logging, metrics, traces
-   - Focus on instrument activities: Add logging, metrics, traces
-3. **Collect** - Set up aggregation and storage
-   - Focus on collect activities: Set up aggregation and storage
-4. **Visualize** - Create dashboards
-   - Focus on visualize activities: Create dashboards
-5. **Alert** - Configure meaningful alerts
-   - Focus on alert activities: Configure meaningful alerts
+1. **Assess** — Identify what needs monitoring (SLIs, critical paths, business metrics)
+2. **Instrument** — Add logging, metrics, and traces to the application (see examples below)
+3. **Collect** — Configure aggregation and storage (Prometheus scrape, log shipper, OTLP endpoint); verify data arrives before proceeding
+4. **Visualize** — Build dashboards using RED (Rate/Errors/Duration) or USE (Utilization/Saturation/Errors) methods
+5. **Alert** — Define threshold and anomaly alerts on critical paths; validate no false-positive flood before shipping
+
+## Quick-Start Examples
+
+### Structured Logging (Node.js / Pino)
+```js
+import pino from 'pino';
+
+const logger = pino({ level: 'info' });
+
+// Good — structured fields, includes correlation ID
+logger.info({ requestId: req.id, userId: req.user.id, durationMs: elapsed }, 'order.created');
+
+// Bad — string interpolation, no correlation
+console.log(`Order created for user ${userId}`);
+```
+
+### Prometheus Metrics (Node.js)
+```js
+import { Counter, Histogram, register } from 'prom-client';
+
+const httpRequests = new Counter({
+  name: 'http_requests_total',
+  help: 'Total HTTP requests',
+  labelNames: ['method', 'route', 'status'],
+});
+
+const httpDuration = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request latency',
+  labelNames: ['method', 'route'],
+  buckets: [0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+});
+
+// Instrument a route
+app.use((req, res, next) => {
+  const end = httpDuration.startTimer({ method: req.method, route: req.path });
+  res.on('finish', () => {
+    httpRequests.inc({ method: req.method, route: req.path, status: res.statusCode });
+    end();
+  });
+  next();
+});
+
+// Expose scrape endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+```
+
+### OpenTelemetry Tracing (Node.js)
+```js
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { trace } from '@opentelemetry/api';
+
+const sdk = new NodeSDK({
+  traceExporter: new OTLPTraceExporter({ url: 'http://jaeger:4318/v1/traces' }),
+});
+sdk.start();
+
+// Manual span around a critical operation
+const tracer = trace.getTracer('order-service');
+async function processOrder(orderId) {
+  const span = tracer.startSpan('order.process');
+  span.setAttribute('order.id', orderId);
+  try {
+    const result = await db.saveOrder(orderId);
+    span.setStatus({ code: SpanStatusCode.OK });
+    return result;
+  } catch (err) {
+    span.recordException(err);
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    throw err;
+  } finally {
+    span.end();
+  }
+}
+```
+
+### Prometheus Alerting Rule
+```yaml
+groups:
+  - name: api.rules
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          rate(http_requests_total{status=~"5.."}[5m])
+          / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error rate above 5% on {{ $labels.route }}"
+```
+
+### k6 Load Test
+```js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '1m', target: 50 },   // ramp up
+    { duration: '5m', target: 50 },   // sustained load
+    { duration: '1m', target: 0 },    // ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<500'],  // 95th percentile < 500 ms
+    http_req_failed:   ['rate<0.01'],  // error rate < 1%
+  },
+};
+
+export default function () {
+  const res = http.get('https://api.example.com/orders');
+  check(res, { 'status is 200': (r) => r.status === 200 });
+  sleep(1);
+}
+```
 
 ## Reference Guide
 
@@ -72,53 +159,18 @@ Load detailed guidance based on context:
 | Profiling | `references/application-profiling.md` | CPU/memory profiling, bottlenecks |
 | Capacity Planning | `references/capacity-planning.md` | Scaling, forecasting, budgets |
 
-
-### Routing Table
-
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
-
-
-## Common Pitfalls
-
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
-
-
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Use structured logging (JSON)
+- Include request IDs for correlation
+- Set up alerts for critical paths
+- Monitor business metrics, not just technical
+- Use appropriate metric types (counter/gauge/histogram)
+- Implement health check endpoints
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Log sensitive data (passwords, tokens, PII)
 - Alert on every error (alert fatigue)
 - Use string interpolation in logs (use structured fields)
 - Skip correlation IDs in distributed systems
-
-## Best Practices
-
-- Follow established patterns and conventions
-- Write self-documenting code with clear names
-- Keep functions focused and modular
-- Use appropriate data structures
-- Handle errors gracefully
-- Optimize only after profiling
-- Document non-obvious decisions
-
-## Knowledge Reference
-
-Prometheus, Grafana, ELK Stack, Loki, Jaeger, OpenTelemetry, DataDog, New Relic, CloudWatch, structured logging, RED metrics, USE method, k6, Artillery, Locust, JMeter, clinic.js, pprof, py-spy, async-profiler, capacity planning

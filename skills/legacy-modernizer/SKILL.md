@@ -1,64 +1,36 @@
 ---
 name: legacy-modernizer
-description: Use when modernizing legacy systems, implementing incremental migration strategies, or reducing technical debt. Invoke for strangler fig pattern, monolith decomposition, framework upgrades.
+description: Designs incremental migration strategies, identifies service boundaries, produces dependency maps and migration roadmaps, and generates API facade designs for aging codebases. Use when modernizing legacy systems, implementing strangler fig pattern or branch by abstraction, decomposing monoliths, upgrading frameworks or languages, or reducing technical debt without disrupting business operations.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: specialized
   triggers: legacy modernization, strangler fig, incremental migration, technical debt, legacy refactoring, system migration, legacy system, modernize codebase
   role: specialist
   scope: architecture
-  output-format: analysis-and-code
+  output-format: code+analysis
   related-skills: test-master, devops-engineer
 ---
 
 # Legacy Modernizer
 
-Senior legacy modernization specialist with expertise in transforming aging systems into modern architectures without disrupting business operations.
-
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in specialized.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Debugging complex issues
-- Optimizing performance
-- Handling edge cases
-- Ensuring security best practices
-
-- Understanding performance characteristics
-- Reviewing security implications
-- Considering scalability requirements
-
-- Modernizing legacy codebases and outdated technology stacks
-- Implementing strangler fig or branch by abstraction patterns
-- Migrating from monoliths to microservices incrementally
-- Refactoring legacy code with comprehensive safety nets
-- Upgrading frameworks, languages, or infrastructure safely
-- Reducing technical debt while maintaining business continuity
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
-1. **Assess system** - Analyze codebase, dependencies, risks, and business constraints
-   - Focus on assess system activities: Analyze codebase, dependencies, risks, and business constraints
-2. **Plan migration** - Design incremental roadmap with rollback strategies
-   - Focus on plan migration activities: Design incremental roadmap with rollback strategies
-3. **Build safety net** - Create characterization tests and monitoring
-   - Focus on build safety net activities: Create characterization tests and monitoring
-4. **Migrate incrementally** - Apply strangler fig pattern with feature flags
-   - Focus on migrate incrementally activities: Apply strangler fig pattern with feature flags
-5. **Validate & iterate** - Test thoroughly, monitor metrics, adjust approach
-   - Focus on validate & iterate activities: Test thoroughly, monitor metrics, adjust approach
+1. **Assess system** — Analyze codebase, dependencies, risks, and business constraints. Produce a dependency map and risk register before proceeding.
+   - *Validation checkpoint:* Confirm all external integrations and data contracts are documented before moving to step 2.
+
+2. **Plan migration** — Design an incremental roadmap with explicit rollback strategies per phase. Reference `references/system-assessment.md` for code analysis templates.
+   - *Validation checkpoint:* Confirm each phase has a defined rollback trigger and owner.
+
+3. **Build safety net** — Create characterization tests and monitoring before touching production code. Target 80%+ coverage of existing behavior.
+   - *Validation checkpoint:* Run the characterization test suite and confirm it passes green on the unmodified legacy system before proceeding.
+
+4. **Migrate incrementally** — Apply strangler fig pattern with feature flags. Route traffic via a facade; shift load gradually.
+   - *Validation checkpoint:* Verify error rates and latency metrics remain within baseline thresholds after each traffic increment (e.g., 5% → 25% → 50% → 100%).
+
+5. **Validate & iterate** — Run full test suite, review monitoring dashboards, and confirm business behavior is preserved before retiring legacy code.
+   - *Validation checkpoint:* New code must be proven stable at 100% traffic for at least one release cycle before legacy path is removed.
 
 ## Reference Guide
 
@@ -72,27 +44,77 @@ Load detailed guidance based on context:
 | Testing | `references/legacy-testing.md` | Characterization tests, golden master, approval |
 | Assessment | `references/system-assessment.md` | Code analysis, dependency mapping, risk evaluation |
 
-## Common Pitfalls
+## Code Examples
 
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
+### Strangler Fig Facade (Python)
+```python
+# facade.py — routes requests to legacy or new service based on a feature flag
+import os
+from legacy_service import LegacyOrderService
+from new_service import NewOrderService
 
+class OrderServiceFacade:
+    def __init__(self):
+        self._legacy = LegacyOrderService()
+        self._new = NewOrderService()
+
+    def get_order(self, order_id: str):
+        if os.getenv("USE_NEW_ORDER_SERVICE", "false").lower() == "true":
+            return self._new.fetch(order_id)
+        return self._legacy.get(order_id)
+```
+
+### Feature Flag Wrapper
+```python
+# feature_flags.py — thin wrapper around an environment or config-based flag store
+import os
+
+def flag_enabled(flag_name: str, default: bool = False) -> bool:
+    """Check whether a migration feature flag is active."""
+    return os.getenv(flag_name, str(default)).lower() == "true"
+
+# Usage
+if flag_enabled("USE_NEW_PAYMENT_GATEWAY"):
+    result = new_gateway.charge(order)
+else:
+    result = legacy_gateway.charge(order)
+```
+
+### Characterization Test Template (pytest)
+```python
+# test_characterization_orders.py
+# Captures existing legacy behavior as a golden-master safety net.
+import pytest
+from legacy_service import LegacyOrderService
+
+service = LegacyOrderService()
+
+@pytest.mark.parametrize("order_id,expected_status", [
+    ("ORD-001", "SHIPPED"),
+    ("ORD-002", "PENDING"),
+    ("ORD-003", "CANCELLED"),
+])
+def test_order_status_golden_master(order_id, expected_status):
+    """Fail loudly if legacy behavior changes unexpectedly."""
+    result = service.get(order_id)
+    assert result["status"] == expected_status, (
+        f"Characterization broken for {order_id}: "
+        f"expected {expected_status}, got {result['status']}"
+    )
+```
 
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Maintain zero production disruption during all migrations
+- Create comprehensive test coverage before refactoring (target 80%+)
+- Use feature flags for all incremental rollouts
+- Implement monitoring and rollback procedures
+- Document all migration decisions and rationale
+- Preserve existing business logic and behavior
+- Communicate progress and risks transparently
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Big bang rewrites or replacements
 - Skip testing legacy behavior before changes
 - Deploy without rollback capability
@@ -103,18 +125,13 @@ Avoid these common mistakes:
 
 ## Output Templates
 
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
-
 When implementing modernization, provide:
 1. Assessment summary (risks, dependencies, approach)
 2. Migration plan (phases, rollback strategy, metrics)
 3. Implementation code (facades, adapters, new services)
 4. Test coverage (characterization, integration, e2e)
-5. Monitoring setup (metrics, alerts, dashboards) Knowledge Reference
+5. Monitoring setup (metrics, alerts, dashboards)
+
+## Knowledge Reference
 
 Strangler fig pattern, branch by abstraction, characterization testing, incremental migration, feature flags, canary deployments, API versioning, database refactoring, microservices extraction, technical debt reduction, zero-downtime deployment

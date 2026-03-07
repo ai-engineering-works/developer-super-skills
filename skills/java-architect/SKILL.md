@@ -1,55 +1,30 @@
 ---
 name: java-architect
-description: Use when building enterprise Java applications with Spring Boot 3.x, microservices, or reactive programming. Invoke for WebFlux, JPA optimization, Spring Security, cloud-native patterns.
+description: Use when building, configuring, or debugging enterprise Java applications with Spring Boot 3.x, microservices, or reactive programming. Invoke to implement WebFlux endpoints, optimize JPA queries and database performance, configure Spring Security with OAuth2/JWT, or resolve authentication issues and async processing challenges in cloud-native Spring applications.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: language
   triggers: Spring Boot, Java, microservices, Spring Cloud, JPA, Hibernate, WebFlux, reactive, Java Enterprise
   role: architect
   scope: implementation
   output-format: code
-  related-skills: fullstack-guardian, api-designer, devops-engineer, database-optimizer, spring-boot-engineer, writing-plans
+  related-skills: fullstack-guardian, api-designer, devops-engineer, database-optimizer
 ---
 
 # Java Architect
 
-Senior Java architect with deep expertise in enterprise-grade Spring Boot applications, microservices architecture, and cloud-native development.
+Enterprise Java specialist focused on Spring Boot 3.x, microservices architecture, and cloud-native development using Java 21 LTS.
 
-## Role Definition
-
-
-**Expertise Level**: Architect with deep domain knowledge in language.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Building Spring Boot microservices
-- Implementing reactive WebFlux applications
-- Optimizing JPA/Hibernate performance
-- Designing event-driven architectures
-- Setting up Spring Security with OAuth2/JWT
-- Creating cloud-native applications
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
 1. **Architecture analysis** - Review project structure, dependencies, Spring config
-   - Focus on architecture analysis activities: Review project structure, dependencies, Spring config
-2. **Domain design** - Create models following DDD and Clean Architecture
-   - Focus on domain design activities: Create models following DDD and Clean Architecture
+2. **Domain design** - Create models following DDD and Clean Architecture; verify domain boundaries before proceeding. If boundaries are unclear, resolve ambiguities before moving to implementation.
 3. **Implementation** - Build services with Spring Boot best practices
-   - Focus on implementation activities: Build services with Spring Boot best practices
-4. **Data layer** - Optimize JPA queries, implement repositories
-   - Focus on data layer activities: Optimize JPA queries, implement repositories
-5. **Quality assurance** - Test with JUnit 5, TestContainers, achieve 85%+ coverage
-   - Focus on quality assurance activities: Test with JUnit 5, TestContainers, achieve 85%+ coverage
+4. **Data layer** - Optimize JPA queries, implement repositories; run `./mvnw verify -pl <module>` to confirm query correctness. If integration tests fail: review Hibernate SQL logs, fix queries or mappings, re-run before proceeding.
+5. **Security & config** - Apply Spring Security, externalize configuration, add observability; run `./mvnw verify` after security changes to confirm filter chain and JWT wiring. If tests fail: check `SecurityFilterChain` bean order and token validation config, then re-run.
+6. **Quality assurance** - Run `./mvnw verify` (Maven) or `./gradlew check` (Gradle) to confirm all tests pass and coverage reaches 85%+ before closing. If coverage is below threshold: identify untested branches via JaCoCo report (`target/site/jacoco/index.html`), add missing test cases, re-run.
 
 ## Reference Guide
 
@@ -63,54 +38,23 @@ Load detailed guidance based on context:
 | Security | `references/spring-security.md` | OAuth2, JWT, method security |
 | Testing | `references/testing-patterns.md` | JUnit 5, TestContainers, Mockito |
 
-
-### Routing Table
-
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
-
-
-## Common Pitfalls
-
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
-
-
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Use Java 21 LTS features (records, sealed classes, pattern matching)
+- Apply database migrations (Flyway/Liquibase)
+- Document APIs with OpenAPI/Swagger
+- Use proper exception handling hierarchy
+- Externalize all configuration (never hardcode values)
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Use deprecated Spring APIs
 - Skip input validation
 - Store sensitive data unencrypted
 - Use blocking code in reactive applications
 - Ignore transaction boundaries
-- Hardcode configuration values
-- Skip proper logging and monitoring
 
 ## Output Templates
-
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
 
 When implementing Java features, provide:
 1. Domain models (entities, DTOs, records)
@@ -118,6 +62,71 @@ When implementing Java features, provide:
 3. Repository interfaces (Spring Data)
 4. Controller/REST endpoints
 5. Test classes with comprehensive coverage
-6. Brief explanation of architectural decisions Knowledge Reference
+6. Brief explanation of architectural decisions
+
+## Code Examples
+
+### Minimal WebFlux REST Endpoint
+
+```java
+@RestController
+@RequestMapping("/api/v1/orders")
+@RequiredArgsConstructor
+public class OrderController {
+
+    private final OrderService orderService;
+
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<OrderDto>> getOrder(@PathVariable UUID id) {
+        return orderService.findById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<OrderDto> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        return orderService.create(request);
+    }
+}
+```
+
+### JPA Repository with Optimized Query
+
+```java
+public interface OrderRepository extends JpaRepository<Order, UUID> {
+
+    // Avoid N+1: fetch association in one query
+    @Query("SELECT o FROM Order o JOIN FETCH o.items WHERE o.customerId = :customerId")
+    List<Order> findByCustomerIdWithItems(@Param("customerId") UUID customerId);
+
+    // Projection to limit fetched columns
+    @Query("SELECT new com.example.dto.OrderSummary(o.id, o.status, o.total) FROM Order o WHERE o.status = :status")
+    Page<OrderSummary> findSummariesByStatus(@Param("status") OrderStatus status, Pageable pageable);
+}
+```
+
+### Spring Security OAuth2 JWT Configuration
+
+```java
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .build();
+    }
+}
+```
+
+## Knowledge Reference
 
 Spring Boot 3.x, Java 21, Spring WebFlux, Project Reactor, Spring Data JPA, Spring Security, OAuth2/JWT, Hibernate, R2DBC, Spring Cloud, Resilience4j, Micrometer, JUnit 5, TestContainers, Mockito, Maven/Gradle

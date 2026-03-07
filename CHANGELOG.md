@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.4.10] - 2026-03-06
+
+### Changed
+- Improved skill quality across 65 skills via Tessl review optimization (#172)
+  - Expanded descriptions with capability verbs (what it does + when to use it)
+  - Removed redundant "Role Definition" and "When to Use This Skill" sections
+  - Added structured workflow validation checkpoints with failure recovery loops
+  - Added inline code examples demonstrating key patterns per technology
+  - Tightened MUST DO / MUST NOT DO constraints with rationale
+  - Removed "Knowledge Reference" keyword lists (absorbed into descriptions and triggers)
+- Narrowed Description Trap from "trigger-only" to "no process steps" — capability verbs now permitted in descriptions per AgentSkills.io spec
+- Updated description format to `[Brief capability statement]. Use when [triggering conditions].`
+- Validator now checks `"Use when" in description` instead of `startswith("Use when")`
+- Standardized README links from HTML to Markdown, improved Quick Start readability (#166)
+
+### Fixed
+- Fixed stale counts on docs site landing page (65 → 66 skills, 357 → 365 references)
+- Added Astro site files to `update-docs.py` release automation so counts stay in sync
+
+### Contributors
+- @popey — Improve skill quality across 65 skills via Tessl review (#172)
+- @hasan613 — Standardize README links and improve Quick Start section (#166)
+
 ## [0.4.9] - 2026-02-24
 
 ### Added
@@ -374,6 +399,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Monitoring: Prometheus, Grafana, ELK, DataDog
 - Security: OWASP Top 10, SAST tools
 
+[0.4.11]: https://github.com/selvakumarEsra/claude-skills/compare/v0.4.10...v0.4.11
+[0.4.10]: https://github.com/selvakumarEsra/claude-skills/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/selvakumarEsra/claude-skills/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/selvakumarEsra/claude-skills/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/selvakumarEsra/claude-skills/compare/v0.4.6...v0.4.7

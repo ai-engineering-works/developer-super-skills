@@ -3,8 +3,8 @@ name: websocket-engineer
 description: Use when building real-time communication systems with WebSockets or Socket.IO. Invoke for bidirectional messaging, horizontal scaling with Redis, presence tracking, room management.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: api-architecture
   triggers: WebSocket, Socket.IO, real-time communication, bidirectional messaging, pub/sub, server push, live updates, chat systems, presence tracking
   role: specialist
@@ -15,41 +15,14 @@ metadata:
 
 # WebSocket Engineer
 
-Senior WebSocket specialist with expertise in real-time bidirectional communication, Socket.IO, and scalable messaging architectures supporting millions of concurrent connections.
-
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in api-architecture.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Building WebSocket servers (Socket.IO, ws, uWebSockets)
-- Implementing real-time features (chat, notifications, live updates)
-- Scaling WebSocket infrastructure horizontally
-- Setting up presence systems and room management
-- Optimizing message throughput and latency
-- Migrating from polling to WebSockets
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
-1. **Analyze requirements** - Identify connection scale, message volume, latency needs
-   - Focus on analyze requirements activities: Identify connection scale, message volume, latency needs
-2. **Design architecture** - Plan clustering, pub/sub, state management, failover
-   - Focus on design architecture activities: Plan clustering, pub/sub, state management, failover
-3. **Implement** - Build WebSocket server with authentication, rooms, events
-   - Focus on implement activities: Build WebSocket server with authentication, rooms, events
-4. **Scale** - Configure Redis adapter, sticky sessions, load balancing
-   - Focus on scale activities: Configure Redis adapter, sticky sessions, load balancing
-5. **Monitor** - Track connections, latency, throughput, error rates
-   - Focus on monitor activities: Track connections, latency, throughput, error rates
+1. **Analyze requirements** — Identify connection scale, message volume, latency needs
+2. **Design architecture** — Plan clustering, pub/sub, state management, failover
+3. **Implement** — Build WebSocket server with authentication, rooms, events
+4. **Validate locally** — Test connection handling, auth, and room behavior before scaling (e.g., `npx wscat -c ws://localhost:3000`); confirm auth rejection on missing/invalid tokens, room join/leave events, and message delivery
+5. **Scale** — Verify Redis connection and pub/sub round-trip before enabling the adapter; configure sticky sessions and confirm with test connections across multiple instances; set up load balancing
+6. **Monitor** — Track connections, latency, throughput, error rates; add alerts for connection-count spikes and error-rate thresholds
 
 ## Reference Guide
 
@@ -63,60 +36,133 @@ Load detailed guidance based on context:
 | Security | `references/security.md` | Authentication, authorization, rate limiting, CORS |
 | Alternatives | `references/alternatives.md` | SSE, long polling, when to choose WebSockets |
 
+## Code Examples
 
-### Routing Table
+### Server Setup (Socket.IO with Auth and Room Management)
 
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
+```js
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { createClient } from "redis";
+import jwt from "jsonwebtoken";
 
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: { origin: process.env.ALLOWED_ORIGIN, credentials: true },
+  pingTimeout: 20000,
+  pingInterval: 25000,
+});
 
-## Common Pitfalls
+// Authentication middleware — runs before connection is established
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error("Authentication required"));
+  try {
+    socket.data.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    next(new Error("Invalid token"));
+  }
+});
 
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
+// Redis adapter for horizontal scaling
+const pubClient = createClient({ url: process.env.REDIS_URL });
+const subClient = pubClient.duplicate();
+await Promise.all([pubClient.connect(), subClient.connect()]);
+io.adapter(createAdapter(pubClient, subClient));
 
+io.on("connection", (socket) => {
+  const { userId } = socket.data.user;
+  console.log(`connected: ${userId} (${socket.id})`);
+
+  // Presence: mark user online
+  pubClient.hSet("presence", userId, socket.id);
+
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    socket.to(roomId).emit("user-joined", { userId });
+  });
+
+  socket.on("message", ({ roomId, text }) => {
+    io.to(roomId).emit("message", { userId, text, ts: Date.now() });
+  });
+
+  socket.on("disconnect", () => {
+    pubClient.hDel("presence", userId);
+    console.log(`disconnected: ${userId}`);
+  });
+});
+
+httpServer.listen(3000);
+```
+
+### Client-Side Reconnection with Exponential Backoff
+
+```js
+import { io } from "socket.io-client";
+
+const socket = io("wss://api.example.com", {
+  auth: { token: getAuthToken() },
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,       // initial delay (ms)
+  reconnectionDelayMax: 30000,   // cap at 30 s
+  randomizationFactor: 0.5,      // jitter to avoid thundering herd
+});
+
+// Queue messages while disconnected
+let messageQueue = [];
+
+socket.on("connect", () => {
+  console.log("connected:", socket.id);
+  // Flush queued messages
+  messageQueue.forEach((msg) => socket.emit("message", msg));
+  messageQueue = [];
+});
+
+socket.on("disconnect", (reason) => {
+  console.warn("disconnected:", reason);
+  if (reason === "io server disconnect") socket.connect(); // manual reconnect
+});
+
+socket.on("connect_error", (err) => {
+  console.error("connection error:", err.message);
+});
+
+function sendMessage(roomId, text) {
+  const msg = { roomId, text };
+  if (socket.connected) {
+    socket.emit("message", msg);
+  } else {
+    messageQueue.push(msg); // buffer until reconnected
+  }
+}
+```
 
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Use sticky sessions for load balancing (WebSocket connections are stateful — requests must route to the same server instance)
+- Implement heartbeat/ping-pong to detect dead connections (TCP keepalive alone is insufficient)
+- Use rooms/namespaces for message scoping rather than filtering in application logic
+- Queue messages during disconnection windows to avoid silent data loss
+- Plan connection limits per instance before scaling horizontally
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
-- Skip connection authentication
-- Broadcast sensitive data to all clients
-- Store large state in memory without clustering strategy
-- Ignore connection limit planning
-- Mix WebSocket and HTTP on same port without proper config
-- Forget to handle connection cleanup
-- Use polling when WebSockets are appropriate
-- Skip load testing before production
+- Store large state in memory without a clustering strategy (use Redis or an external store)
+- Mix WebSocket and HTTP on the same port without explicit upgrade handling
+- Forget to handle connection cleanup (presence records, room membership, in-flight timers)
+- Skip load testing before production — connection-count spikes behave differently from HTTP traffic spikes
 
 ## Output Templates
-
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
 
 When implementing WebSocket features, provide:
 1. Server setup (Socket.IO/ws configuration)
 2. Event handlers (connection, message, disconnect)
 3. Client library (connection, events, reconnection)
-4. Brief explanation of scaling strategy Knowledge Reference
+4. Brief explanation of scaling strategy
+
+## Knowledge Reference
 
 Socket.IO, ws, uWebSockets.js, Redis adapter, sticky sessions, nginx WebSocket proxy, JWT over WebSocket, rooms/namespaces, acknowledgments, binary data, compression, heartbeat, backpressure, horizontal pod autoscaling

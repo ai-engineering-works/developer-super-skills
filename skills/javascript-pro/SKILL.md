@@ -1,29 +1,19 @@
 ---
 name: javascript-pro
-description: Use when building JavaScript applications with modern ES2023+ features, async patterns, or Node.js development. Invoke for vanilla JavaScript, browser APIs, performance optimization, module systems.
+description: Writes, debugs, and refactors JavaScript code using modern ES2023+ features, async/await patterns, ESM module systems, and Node.js APIs. Use when building vanilla JavaScript applications, implementing Promise-based async flows, optimising browser or Node.js performance, working with Web Workers or Fetch API, or reviewing .js/.mjs/.cjs files for correctness and best practices.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: language
   triggers: JavaScript, ES2023, async await, Node.js, vanilla JavaScript, Web Workers, Fetch API, browser API, module system
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: fullstack-guardian, game-developer,vue-expert-js
+  related-skills: fullstack-guardian
 ---
 
 # JavaScript Pro
-
-Senior JavaScript developer with 10+ years mastering modern ES2023+ features, asynchronous patterns, and full-stack JavaScript development.
-
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in language.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
 
 ## When to Use This Skill
 
@@ -34,22 +24,13 @@ considering trade-offs and context when making recommendations.
 - Developing Node.js backend services
 - Implementing Web Workers, Service Workers, or browser APIs
 
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
-1. **Analyze requirements** - Review package.json, module system, Node version, browser targets
-   - Focus on analyze requirements activities: Review package.json, module system, Node version, browser targets
-2. **Design architecture** - Plan modules, async flows, error handling strategies
-   - Focus on design architecture activities: Plan modules, async flows, error handling strategies
-3. **Implement** - Write ES2023+ code with proper patterns and optimizations
-   - Focus on implement activities: Write ES2023+ code with proper patterns and optimizations
-4. **Optimize** - Profile performance, reduce bundle size, prevent memory leaks
-   - Focus on optimize activities: Profile performance, reduce bundle size, prevent memory leaks
-5. **Test** - Write comprehensive tests with Jest achieving 85%+ coverage
-   - Focus on test activities: Write comprehensive tests with Jest achieving 85%+ coverage
+1. **Analyze requirements** — Review `package.json`, module system, Node version, browser targets; confirm `.js`/`.mjs`/`.cjs` conventions
+2. **Design architecture** — Plan modules, async flows, and error handling strategies
+3. **Implement** — Write ES2023+ code with proper patterns and optimisations
+4. **Validate** — Run linter (`eslint --fix`); if linter fails, fix all reported issues and re-run before proceeding. Check for memory leaks with DevTools or `--inspect`, verify bundle size; if leaks are found, resolve them before continuing
+5. **Test** — Write comprehensive tests with Jest achieving 85%+ coverage; if coverage falls short, add missing cases and re-run. Confirm no unhandled Promise rejections
 
 ## Reference Guide
 
@@ -63,60 +44,89 @@ Load detailed guidance based on context:
 | Browser APIs | `references/browser-apis.md` | Fetch, Web Workers, Storage, IntersectionObserver |
 | Node Essentials | `references/node-essentials.md` | fs/promises, streams, EventEmitter, worker threads |
 
-
-### Routing Table
-
-| When you need... | Load this reference |
-|-----------------|---------------------|
-| Quick refresher | See Reference Guide table above |
-| Deep technical details | Any reference from the table |
-| Pattern examples | Reference specific to your topic |
-| Anti-patterns to avoid | Reference specific to your topic |
-
-
-## Common Pitfalls
-
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
-
-
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Use ES2023+ features exclusively
+- Use `X | null` or `X | undefined` patterns
+- Use optional chaining (`?.`) and nullish coalescing (`??`)
+- Use async/await for all asynchronous operations
+- Use ESM (`import`/`export`) for new projects
+- Implement proper error handling with try/catch
+- Add JSDoc comments for complex functions
+- Follow functional programming principles
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Use `var` (always use `const` or `let`)
 - Use callback-based patterns (prefer Promises)
-- Mix CommonJS and ESM in same module
+- Mix CommonJS and ESM in the same module
 - Ignore memory leaks or performance issues
 - Skip error handling in async functions
 - Use synchronous I/O in Node.js
 - Mutate function parameters
-- Create blocking operations in browser
+- Create blocking operations in the browser
+
+## Key Patterns with Examples
+
+### Async/Await Error Handling
+```js
+// ✅ Correct — always handle async errors explicitly
+async function fetchUser(id) {
+  try {
+    const response = await fetch(`/api/users/${id}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (err) {
+    console.error("fetchUser failed:", err);
+    return null;
+  }
+}
+
+// ❌ Incorrect — unhandled rejection, no null guard
+async function fetchUser(id) {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+```
+
+### Optional Chaining & Nullish Coalescing
+```js
+// ✅ Correct
+const city = user?.address?.city ?? "Unknown";
+
+// ❌ Incorrect — throws if address is undefined
+const city = user.address.city || "Unknown";
+```
+
+### ESM Module Structure
+```js
+// ✅ Correct — named exports, no default-only exports for libraries
+// utils/math.mjs
+export const add = (a, b) => a + b;
+export const multiply = (a, b) => a * b;
+
+// consumer.mjs
+import { add } from "./utils/math.mjs";
+
+// ❌ Incorrect — mixing require() with ESM
+const { add } = require("./utils/math.mjs");
+```
+
+### Avoid var / Prefer const
+```js
+// ✅ Correct
+const MAX_RETRIES = 3;
+let attempts = 0;
+
+// ❌ Incorrect
+var MAX_RETRIES = 3;
+var attempts = 0;
+```
 
 ## Output Templates
-
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
 
 When implementing JavaScript features, provide:
 1. Module file with clean exports
 2. Test file with comprehensive coverage
 3. JSDoc documentation for public APIs
-4. Brief explanation of patterns used Knowledge Reference
-
-ES2023, optional chaining, nullish coalescing, private fields, top-level await, Promise patterns, async/await, event loop, ESM/CJS, dynamic imports, Fetch API, Web Workers, Service Workers, Node.js streams, EventEmitter, memory optimization, functional programming
+4. Brief explanation of patterns used

@@ -1,10 +1,10 @@
 ---
 name: kotlin-specialist
-description: Use when building Kotlin applications requiring coroutines, multiplatform development, or Android with Compose. Invoke for Flow API, KMP projects, Ktor servers, DSL design, sealed classes.
+description: Provides idiomatic Kotlin implementation patterns including coroutine concurrency, Flow stream handling, multiplatform architecture, Compose UI construction, Ktor server setup, and type-safe DSL design. Use when building Kotlin applications requiring coroutines, multiplatform development, or Android with Compose. Invoke for Flow API, KMP projects, Ktor servers, DSL design, sealed classes, suspend function, Android Kotlin, Kotlin Multiplatform.
 license: MIT
 metadata:
-  author: https://github.com/selvakumarEsra
-  version: "1.0.0"
+  author: https://github.com/Jeffallan
+  version: "1.1.0"
   domain: language
   triggers: Kotlin, coroutines, Kotlin Multiplatform, KMP, Jetpack Compose, Ktor, Flow, Android Kotlin, suspend function
   role: specialist
@@ -17,48 +17,16 @@ metadata:
 
 Senior Kotlin developer with deep expertise in coroutines, Kotlin Multiplatform (KMP), and modern Kotlin 1.9+ patterns.
 
-## Role Definition
-
-
-**Expertise Level**: Specialist with deep domain knowledge in language.
-
-**Approach**: You combine theoretical best practices with pragmatic solutions,
-considering trade-offs and context when making recommendations.
-
-## When to Use This Skill
-
-- Debugging complex issues
-- Optimizing performance
-- Handling edge cases
-- Ensuring security best practices
-
-- Understanding performance characteristics
-- Reviewing security implications
-- Considering scalability requirements
-
-- Building Kotlin Multiplatform (KMP) libraries or apps
-- Implementing coroutine-based async operations
-- Creating Android apps with Jetpack Compose
-- Developing Ktor server applications
-- Designing type-safe DSLs and builders
-- Optimizing Kotlin performance and compilation
-
-- Analyzing existing code patterns and conventions
-- Refactoring code for better maintainability
-- Ensuring code follows best practices and standards
-- Reviewing code for potential issues and improvements
 ## Core Workflow
 
 1. **Analyze architecture** - Identify platform targets, coroutine patterns, shared code strategy
-   - Focus on analyze architecture activities: Identify platform targets, coroutine patterns, shared code strategy
 2. **Design models** - Create sealed classes, data classes, type hierarchies
-   - Focus on design models activities: Create sealed classes, data classes, type hierarchies
 3. **Implement** - Write idiomatic Kotlin with coroutines, Flow, extension functions
-   - Focus on implement activities: Write idiomatic Kotlin with coroutines, Flow, extension functions
-4. **Optimize** - Apply inline classes, sequence operations, compilation strategies
-   - Focus on optimize activities: Apply inline classes, sequence operations, compilation strategies
-5. **Test** - Write multiplatform tests with coroutine test support
-   - Focus on test activities: Write multiplatform tests with coroutine test support
+   - *Checkpoint:* Verify coroutine cancellation is handled (parent scope cancelled on teardown) and null safety is enforced before proceeding
+4. **Validate** - Run `detekt` and `ktlint`; verify coroutine cancellation handling and null safety
+   - *If detekt/ktlint fails:* Fix all reported issues and re-run both tools before proceeding to step 5
+5. **Optimize** - Apply inline classes, sequence operations, compilation strategies
+6. **Test** - Write multiplatform tests with coroutine test support (`runTest`, Turbine)
 
 ## Reference Guide
 
@@ -72,31 +40,95 @@ Load detailed guidance based on context:
 | Ktor Server | `references/ktor-server.md` | Routing, plugins, authentication, serialization |
 | DSL & Idioms | `references/dsl-idioms.md` | Type-safe builders, scope functions, delegates |
 
-## Common Pitfalls
+## Key Patterns
 
-Avoid these common mistakes:
-- Over-engineering simple problems
-- Under-documenting complex decisions
-- Ignoring edge cases
-- Premature optimization
-- Not considering maintainability
+### Sealed Classes for State Modeling
 
+```kotlin
+sealed class UiState<out T> {
+    data object Loading : UiState<Nothing>()
+    data class Success<T>(val data: T) : UiState<T>()
+    data class Error(val message: String, val cause: Throwable? = null) : UiState<Nothing>()
+}
+
+// Consume exhaustively — compiler enforces all branches
+fun render(state: UiState<User>) = when (state) {
+    is UiState.Loading  -> showSpinner()
+    is UiState.Success  -> showUser(state.data)
+    is UiState.Error    -> showError(state.message)
+}
+```
+
+### Coroutines & Flow
+
+```kotlin
+// Use structured concurrency — never GlobalScope
+class UserRepository(private val api: UserApi, private val scope: CoroutineScope) {
+
+    fun userUpdates(id: String): Flow<UiState<User>> = flow {
+        emit(UiState.Loading)
+        try {
+            emit(UiState.Success(api.fetchUser(id)))
+        } catch (e: IOException) {
+            emit(UiState.Error("Network error", e))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    private val _user = MutableStateFlow<UiState<User>>(UiState.Loading)
+    val user: StateFlow<UiState<User>> = _user.asStateFlow()
+}
+
+// Anti-pattern — blocks the calling thread; avoid in production
+// runBlocking { api.fetchUser(id) }
+```
+
+### Null Safety
+
+```kotlin
+// Prefer safe calls and elvis operator
+val displayName = user?.profile?.name ?: "Anonymous"
+
+// Use let to scope nullable operations
+user?.email?.let { email -> sendNotification(email) }
+
+// !! only when the null case is a true contract violation and documented
+val config = requireNotNull(System.getenv("APP_CONFIG")) { "APP_CONFIG must be set" }
+```
+
+### Scope Functions
+
+```kotlin
+// apply — configure an object, returns receiver
+val request = HttpRequest().apply {
+    url = "https://api.example.com/users"
+    headers["Authorization"] = "Bearer $token"
+}
+
+// let — transform nullable / introduce a local scope
+val length = name?.let { it.trim().length } ?: 0
+
+// also — side-effects without changing the chain
+val user = createUser(form).also { logger.info("Created user ${it.id}") }
+```
 
 ## Constraints
 
 ### MUST DO
-- Follow established patterns and conventions
-- Consider edge cases and error scenarios
-- Document assumptions and constraints
+- Use null safety (`?`, `?.`, `?:`, `!!` only when contract guarantees non-null)
+- Prefer `sealed class` for state modeling
+- Use `suspend` functions for async operations
+- Leverage type inference but be explicit when needed
+- Use `Flow` for reactive streams
+- Apply scope functions appropriately (`let`, `run`, `apply`, `also`, `with`)
+- Document public APIs with KDoc
+- Use explicit API mode for libraries
+- Run `detekt` and `ktlint` before committing
+- Verify coroutine cancellation is handled (cancel parent scope on teardown)
 
 ### MUST NOT DO
-- Cut corners on quality or security
-- Ignore scalability implications
-- Leave technical debt without documentation
 - Block coroutines with `runBlocking` in production code
-- Use `!!` without justification (prefer safe calls)
+- Use `!!` without documented justification
 - Mix platform-specific code in common modules
-- Use Pydantic V1-style patterns (wrong language!)
 - Skip null safety checks
 - Use `GlobalScope.launch` (use structured concurrency)
 - Ignore coroutine cancellation
@@ -104,17 +136,12 @@ Avoid these common mistakes:
 
 ## Output Templates
 
-When providing output, ensure:
-- Clear and actionable recommendations
-- Code examples with explanations
-- Consideration of edge cases
-- Performance and security implications
-- Next steps or follow-up actions
-
 When implementing Kotlin features, provide:
 1. Data models (sealed classes, data classes)
 2. Implementation file (extension functions, suspend functions)
 3. Test file with coroutine test support
-4. Brief explanation of Kotlin-specific patterns used Knowledge Reference
+4. Brief explanation of Kotlin-specific patterns used
+
+## Knowledge Reference
 
 Kotlin 1.9+, Coroutines, Flow API, StateFlow/SharedFlow, Kotlin Multiplatform, Jetpack Compose, Ktor, Arrow.kt, kotlinx.serialization, Detekt, ktlint, Gradle Kotlin DSL, JUnit 5, MockK, Turbine
