@@ -16,28 +16,28 @@ When tests verify mock behavior instead of actual functionality, they provide fa
 
 **The Problem:** Verifying that mocks exist and were called, rather than testing actual component output.
 
-```typescript
-// ❌ BAD: Testing the mock, not the behavior
-it('should call the API', () => {
-  const mockApi = jest.fn().mockResolvedValue({ data: 'test' });
-  const service = new UserService(mockApi);
+```python
+# BAD: Testing the mock, not the behavior
+def test_calls_the_api():
+    mock_api = Mock()
+    mock_api.get_user.return_value = {"id": 1, "name": "Alice"}
+    service = UserService(mock_api)
 
-  service.getUser(1);
+    service.get_user(1)
 
-  expect(mockApi).toHaveBeenCalledWith(1); // Testing mock, not result
-});
+    mock_api.get_user.assert_called_with(1)  # Testing mock, not result
 ```
 
-```typescript
-// ✅ GOOD: Testing actual behavior
-it('should return user data from API', async () => {
-  const mockApi = jest.fn().mockResolvedValue({ id: 1, name: 'Alice' });
-  const service = new UserService(mockApi);
+```python
+# GOOD: Testing actual behavior
+async def test_returns_user_data_from_api():
+    mock_api = AsyncMock()
+    mock_api.get_user.return_value = {"id": 1, "name": "Alice"}
+    service = UserService(mock_api)
 
-  const user = await service.getUser(1);
+    user = await service.get_user(1)
 
-  expect(user.name).toBe('Alice'); // Testing actual output
-});
+    assert user["name"] == "Alice"  # Testing actual output
 ```
 
 **Solution:** Test the genuine component output. If you can only verify mock calls, reconsider whether the test adds value.
@@ -48,40 +48,38 @@ it('should return user data from API', async () => {
 
 **The Problem:** Adding methods to production classes solely for test setup or cleanup.
 
-```typescript
-// ❌ BAD: Production code polluted with test concerns
-class UserCache {
-  private cache: Map<number, User> = new Map();
+```python
+# BAD: Production code polluted with test concerns
+class UserCache:
+    def __init__(self):
+        self._cache: dict[int, User] = {}
 
-  getUser(id: number): User | undefined {
-    return this.cache.get(id);
-  }
+    def get_user(self, user_id: int) -> User | None:
+        return self._cache.get(user_id)
 
-  // This method exists ONLY for tests
-  _resetForTesting(): void {
-    this.cache.clear();
-  }
-}
+    # This method exists ONLY for tests
+    def _reset_for_testing(self):
+        self._cache.clear()
 ```
 
-```typescript
-// ✅ GOOD: Test utilities separate from production
-// production/UserCache.ts
-class UserCache {
-  private cache: Map<number, User> = new Map();
+```python
+# GOOD: Test utilities separate from production
+# production: user_cache.py
+class UserCache:
+    def __init__(self):
+        self._cache: dict[int, User] = {}
 
-  getUser(id: number): User | undefined {
-    return this.cache.get(id);
-  }
-}
+    def get_user(self, user_id: int) -> User | None:
+        return self._cache.get(user_id)
 
-// test/helpers.ts
-function createFreshCache(): UserCache {
-  return new UserCache(); // Fresh instance per test
-}
+# test: conftest.py
+@pytest.fixture
+def cache():
+    """Fresh cache instance per test."""
+    return UserCache()
 ```
 
-**Solution:** Relocate cleanup logic to test utility functions. Use fresh instances per test instead of reset methods.
+**Solution:** Relocate cleanup logic to test fixtures. Use fresh instances per test instead of reset methods.
 
 ---
 
@@ -89,35 +87,38 @@ function createFreshCache(): UserCache {
 
 **The Problem:** Over-mocking without grasping side effects, leading to tests that pass but hide real issues.
 
-```typescript
-// ❌ BAD: Mocking everything without understanding
-it('should process order', async () => {
-  jest.mock('./inventory');
-  jest.mock('./payment');
-  jest.mock('./shipping');
-  jest.mock('./notifications');
+```python
+# BAD: Mocking everything without understanding
+@patch("app.services.inventory.check_stock")
+@patch("app.services.payment.charge")
+@patch("app.services.shipping.create_label")
+@patch("app.services.notifications.send")
+def test_processes_order(mock_notify, mock_ship, mock_pay, mock_stock):
+    mock_stock.return_value = True
+    mock_pay.return_value = {"status": "success"}
 
-  const result = await processOrder(order);
+    result = process_order(order)
 
-  expect(result.success).toBe(true); // What did we actually test?
-});
+    assert result["success"] is True  # What did we actually test?
 ```
 
-```typescript
-// ✅ GOOD: Strategic mocking with real components where possible
-it('should process order with real inventory check', async () => {
-  // Real inventory service against test database
-  const inventory = new InventoryService(testDb);
+```python
+# GOOD: Strategic mocking with real components where possible
+def test_processes_order_with_real_inventory(db_session):
+    # Real inventory service against test database
+    inventory = InventoryService(db_session)
+    inventory.add_stock("item_1", quantity=10)
 
-  // Mock only external services
-  const payment = mockPaymentGateway();
+    # Mock only external services
+    mock_payment = Mock()
+    mock_payment.charge.return_value = {"id": "ch_123", "status": "succeeded"}
 
-  const processor = new OrderProcessor(inventory, payment);
-  const result = await processor.process(order);
+    processor = OrderProcessor(inventory=inventory, payment=mock_payment)
+    order = Order(item_id="item_1", quantity=1)
+    result = processor.process(order)
 
-  expect(result.success).toBe(true);
-  expect(await inventory.getStock(order.itemId)).toBe(originalStock - 1);
-});
+    assert result["success"] is True
+    assert inventory.get_stock("item_1") == 9  # Real side effect verified
 ```
 
 **Solution:** Run tests with real implementations first to understand behavior. Then mock at the appropriate level - external services, not internal logic.
@@ -128,35 +129,58 @@ it('should process order with real inventory check', async () => {
 
 **The Problem:** Partial mock responses missing downstream fields that production code expects.
 
-```typescript
-// ❌ BAD: Incomplete mock response
-const mockUserApi = jest.fn().mockResolvedValue({
-  id: 1,
-  name: 'Test User'
-  // Missing: email, createdAt, permissions, settings...
-});
+```python
+# BAD: Incomplete mock response
+mock_api = Mock()
+mock_api.get_user.return_value = {
+    "id": 1,
+    "name": "Test User",
+    # Missing: email, created_at, permissions, settings...
+}
 
-// Test passes, but production crashes when accessing user.email
+# Test passes, but production crashes accessing user["email"]
 ```
 
-```typescript
-// ✅ GOOD: Complete mock matching real API response
-const mockUserApi = jest.fn().mockResolvedValue({
-  id: 1,
-  name: 'Test User',
-  email: 'test@example.com',
-  createdAt: '2024-01-01T00:00:00Z',
-  permissions: ['read', 'write'],
-  settings: {
-    theme: 'light',
-    notifications: true
-  }
-});
+```python
+# GOOD: Complete mock matching real API response
+mock_api = Mock()
+mock_api.get_user.return_value = {
+    "id": 1,
+    "name": "Test User",
+    "email": "test@example.com",
+    "created_at": "2024-01-01T00:00:00Z",
+    "permissions": ["read", "write"],
+    "settings": {
+        "theme": "light",
+        "notifications": True,
+    },
+}
 
-// Or use a factory
-const mockUserApi = jest.fn().mockResolvedValue(
-  createMockUser({ name: 'Test User' }) // Factory fills defaults
-);
+# Or use a factory
+from tests.factories import UserFactory
+
+mock_api.get_user.return_value = UserFactory.build_response(name="Test User")
+```
+
+```python
+# Factory for consistent mock data
+class UserResponseFactory:
+    """Generate complete API response objects."""
+    _defaults = {
+        "id": 1,
+        "name": "Default User",
+        "email": "default@example.com",
+        "created_at": "2024-01-01T00:00:00Z",
+        "permissions": ["read"],
+        "settings": {"theme": "light", "notifications": True},
+    }
+
+    @classmethod
+    def build(cls, **overrides) -> dict:
+        return {**cls._defaults, **overrides}
+
+# Usage
+mock_api.get_user.return_value = UserResponseFactory.build(name="Alice")
 ```
 
 **Solution:** Mirror complete real API response structure. Use factories to generate complete mock objects with sensible defaults.
@@ -167,35 +191,38 @@ const mockUserApi = jest.fn().mockResolvedValue(
 
 **The Problem:** Treating testing as optional follow-up work rather than integral to development.
 
-```typescript
-// ❌ BAD: "We'll add tests later"
-// Day 1: Write 500 lines of code
-// Day 2: Write 500 more lines
-// Day 3: "We need to ship, tests can wait"
-// Day 30: Catastrophic bug in production
-// Day 31: "Why didn't we have tests?"
+```python
+# BAD: "We'll add tests later"
+# Day 1: Write 500 lines of code
+# Day 2: Write 500 more lines
+# Day 3: "We need to ship, tests can wait"
+# Day 30: Catastrophic bug in production
+# Day 31: "Why didn't we have tests?"
 ```
 
-```typescript
-// ✅ GOOD: Tests are part of implementation
-// Write failing test
-it('should reject duplicate usernames', async () => {
-  await createUser({ username: 'alice' });
+```python
+# GOOD: Tests are part of implementation
+# Write failing test
+def test_rejects_duplicate_usernames(db_session):
+    repo = UserRepository(db_session)
+    repo.create(username="alice", email="alice@example.com")
 
-  await expect(createUser({ username: 'alice' }))
-    .rejects.toThrow('Username already exists');
-});
+    with pytest.raises(DuplicateUsernameError, match="Username already exists"):
+        repo.create(username="alice", email="other@example.com")
 
-// Make it pass
-async function createUser(data: UserInput): Promise<User> {
-  const existing = await db.users.findByUsername(data.username);
-  if (existing) {
-    throw new Error('Username already exists');
-  }
-  return db.users.create(data);
-}
 
-// Feature AND test ship together
+# Make it pass
+class UserRepository:
+    def create(self, username: str, email: str) -> User:
+        existing = self.session.query(User).filter_by(username=username).first()
+        if existing:
+            raise DuplicateUsernameError("Username already exists")
+        user = User(username=username, email=email)
+        self.session.add(user)
+        self.session.commit()
+        return user
+
+# Feature AND test ship together
 ```
 
 **Solution:** Follow TDD - testing is implementation, not documentation. No feature is "done" without tests.
@@ -208,10 +235,10 @@ Review your tests for these warning signs:
 
 | Warning Sign | Anti-Pattern |
 |-------------|--------------|
-| `expect(mock).toHaveBeenCalled()` without testing output | Testing mock behavior |
-| Methods starting with `_` or `ForTesting` in production | Test-only methods |
-| Every dependency is mocked | Mocking without understanding |
-| Mocks return `{ success: true }` only | Incomplete mocks |
+| `mock.assert_called_with()` without testing output | Testing mock behavior |
+| Methods starting with `_` or `for_testing` in production | Test-only methods |
+| Every dependency is mocked with `@patch` | Mocking without understanding |
+| Mocks return `{"success": True}` only | Incomplete mocks |
 | Test files added weeks after feature ships | Tests as afterthought |
 
 ---
@@ -221,8 +248,8 @@ Review your tests for these warning signs:
 | Anti-Pattern | Symptom | Fix |
 |-------------|---------|-----|
 | Testing mocks | Only mock assertions, no behavior tests | Assert on actual output |
-| Test-only methods | `_reset()`, `_setForTest()` in prod | Use fresh instances |
-| Over-mocking | 10+ mocks per test | Test with real deps first |
+| Test-only methods | `_reset()`, `_set_for_test()` in prod | Use fresh `@pytest.fixture` instances |
+| Over-mocking | 10+ `@patch` decorators per test | Test with real deps first |
 | Incomplete mocks | Minimal stub responses | Use factories, match reality |
 | Tests as afterthought | Features ship untested | TDD from the start |
 

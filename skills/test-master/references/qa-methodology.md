@@ -34,24 +34,56 @@ Observations:
 ```
 
 ### Accessibility Testing (WCAG 2.1 AA)
-```typescript
-test('accessibility compliance', async ({ page }) => {
-  // Keyboard navigation
-  await page.keyboard.press('Tab');
-  expect(['A', 'BUTTON', 'INPUT']).toContain(
-    await page.evaluate(() => document.activeElement.tagName)
-  );
-  
-  // ARIA labels
-  expect(await page.getByRole('button').first().getAttribute('aria-label')).toBeTruthy();
-  
-  // Color contrast (axe-core)
-  const violations = await page.evaluate(async () => {
-    const axe = await import('axe-core');
-    return (await axe.run()).violations;
-  });
-  expect(violations).toHaveLength(0);
-});
+
+```python
+from playwright.sync_api import Page, expect
+
+
+def test_keyboard_navigation(page: Page):
+    page.goto("/")
+    page.keyboard.press("Tab")
+
+    active_tag = page.evaluate("document.activeElement?.tagName")
+    assert active_tag in ("A", "BUTTON", "INPUT"), f"Unexpected focus on {active_tag}"
+
+
+def test_buttons_have_aria_labels(page: Page):
+    page.goto("/")
+    buttons = page.get_by_role("button").all()
+
+    for button in buttons:
+        text = button.text_content() or ""
+        aria_label = button.get_attribute("aria-label") or ""
+        assert text.strip() or aria_label.strip(), "Button has no accessible name"
+
+
+def test_no_accessibility_violations(page: Page):
+    """Run axe-core accessibility audit."""
+    page.goto("/")
+
+    # Inject and run axe-core
+    violations = page.evaluate("""
+        async () => {
+            await new Promise(r => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js';
+                s.onload = r;
+                document.head.appendChild(s);
+            });
+            const results = await axe.run();
+            return results.violations;
+        }
+    """)
+    assert len(violations) == 0, f"Accessibility violations: {violations}"
+
+
+def test_images_have_alt_text(page: Page):
+    page.goto("/")
+    images = page.locator("img").all()
+
+    for img in images:
+        alt = img.get_attribute("alt")
+        assert alt is not None and alt.strip(), "Image missing alt text"
 ```
 
 ### Localization Testing
@@ -68,23 +100,43 @@ test('accessibility compliance', async ({ page }) => {
 ```markdown
 | Browser | Version | OS | Status |
 |---------|---------|----|----- --|
-| Chrome | Latest | Win/Mac | ✓ |
-| Firefox | Latest | Win/Mac | ✓ |
-| Safari | Latest | macOS/iOS | ✓ |
-| Edge | Latest | Windows | ✓ |
+| Chrome | Latest | Win/Mac | Pass |
+| Firefox | Latest | Win/Mac | Pass |
+| Safari | Latest | macOS/iOS | Pass |
+| Edge | Latest | Windows | Pass |
 ```
 
 ## Test Design Techniques
 
 ### Pairwise Testing
-```typescript
-// Test all parameter pairs efficiently
-const pairwiseTests = [
-  { browser: 'chrome', os: 'windows', lang: 'en' },
-  { browser: 'firefox', os: 'mac', lang: 'es' },
-  { browser: 'safari', os: 'windows', lang: 'fr' },
-  // Covers all pairs with minimal tests
-];
+
+```python
+import pytest
+from itertools import product
+
+
+# Generate pairwise combinations efficiently
+BROWSERS = ["chrome", "firefox", "safari"]
+OS_LIST = ["windows", "mac", "linux"]
+LANGUAGES = ["en", "es", "fr"]
+
+
+# Pairwise subset covering all pairs with minimal tests
+PAIRWISE_TESTS = [
+    {"browser": "chrome", "os": "windows", "lang": "en"},
+    {"browser": "firefox", "os": "mac", "lang": "es"},
+    {"browser": "safari", "os": "linux", "lang": "fr"},
+    {"browser": "chrome", "os": "mac", "lang": "fr"},
+    {"browser": "firefox", "os": "linux", "lang": "en"},
+    {"browser": "safari", "os": "windows", "lang": "es"},
+]
+
+
+@pytest.mark.parametrize("config", PAIRWISE_TESTS, ids=lambda c: f"{c['browser']}-{c['os']}-{c['lang']}")
+def test_compatibility(config):
+    """Run tests across pairwise parameter combinations."""
+    assert config["browser"] in BROWSERS
+    # ... actual test logic
 ```
 
 ### Risk-Based Testing
@@ -95,6 +147,36 @@ const pairwiseTests = [
 | High | Med-High | High | P1 | Comprehensive |
 | Medium | Low-Med | Med | P2 | Standard |
 | Low | Low | Low | P3 | Smoke only |
+```
+
+### Boundary Value Analysis
+
+```python
+import pytest
+
+
+@pytest.mark.parametrize("age, expected_valid", [
+    (-1, False),     # below minimum
+    (0, True),       # minimum boundary
+    (1, True),       # just above minimum
+    (149, True),     # just below maximum
+    (150, True),     # maximum boundary
+    (151, False),    # above maximum
+])
+def test_age_validation_boundaries(age, expected_valid):
+    result = validate_age(age)
+    assert result == expected_valid
+
+
+@pytest.mark.parametrize("length, expected_valid", [
+    (0, False),      # empty
+    (1, True),       # minimum
+    (255, True),     # max boundary
+    (256, False),    # over max
+])
+def test_username_length_boundaries(length, expected_valid):
+    username = "a" * length
+    assert validate_username(username) == expected_valid
 ```
 
 ## Defect Management
@@ -129,29 +211,48 @@ const pairwiseTests = [
 ## Quality Metrics
 
 ### Key Calculations
-```typescript
-// Defect Removal Efficiency (target: >95%)
-const dre = (defectsInTesting / (defectsInTesting + defectsInProd)) * 100;
 
-// Defect Leakage (target: <5%)
-const leakage = (defectsInProd / totalDefects) * 100;
+```python
+def calculate_quality_metrics(
+    defects_in_testing: int,
+    defects_in_prod: int,
+    defects_found_by_tests: int,
+) -> dict:
+    total_defects = defects_in_testing + defects_in_prod
 
-// Test Effectiveness (target: >90%)
-const effectiveness = (defectsFoundByTests / totalDefects) * 100;
+    # Defect Removal Efficiency (target: >95%)
+    dre = (defects_in_testing / total_defects * 100) if total_defects > 0 else 100
 
-// Automation ROI
-const roi = (timeSaved - maintenanceCost - developmentCost) / developmentCost;
+    # Defect Leakage (target: <5%)
+    leakage = (defects_in_prod / total_defects * 100) if total_defects > 0 else 0
+
+    # Test Effectiveness (target: >90%)
+    effectiveness = (defects_found_by_tests / total_defects * 100) if total_defects > 0 else 100
+
+    return {
+        "dre": round(dre, 1),
+        "leakage": round(leakage, 1),
+        "effectiveness": round(effectiveness, 1),
+    }
+
+
+def calculate_automation_roi(
+    time_saved_hours: float,
+    maintenance_cost_hours: float,
+    development_cost_hours: float,
+) -> float:
+    return (time_saved_hours - maintenance_cost_hours - development_cost_hours) / development_cost_hours
 ```
 
 ### Quality Dashboard
 ```markdown
 | Metric | Target | Actual | Trend | Status |
 |--------|--------|--------|-------|--------|
-| Coverage | >80% | 87% | ↑ | ✓ |
-| Defect Leakage | <5% | 3% | ↓ | ✓ |
-| Automation | >70% | 68% | ↑ | ⚠ |
-| Critical Defects | 0 | 0 | → | ✓ |
-| MTTR | <48h | 36h | ↓ | ✓ |
+| Coverage | >80% | 87% | Up | Pass |
+| Defect Leakage | <5% | 3% | Down | Pass |
+| Automation | >70% | 68% | Up | Warn |
+| Critical Defects | 0 | 0 | Steady | Pass |
+| MTTR | <48h | 36h | Down | Pass |
 ```
 
 ## Continuous Testing & Shift-Left
@@ -170,13 +271,14 @@ const roi = (timeSaved - maintenanceCost - developmentCost) / developmentCost;
 ```
 
 ### Feedback Cycle Targets
-```typescript
-const feedbackCycle = {
-  unitTests: '< 5 min',       // On save
-  integration: '< 15 min',    // On commit
-  e2e: '< 30 min',            // On PR
-  regression: '< 2 hours',    // Nightly
-};
+
+```python
+FEEDBACK_TARGETS = {
+    "unit_tests": "< 5 min",       # On save
+    "integration": "< 15 min",     # On commit
+    "e2e": "< 30 min",             # On PR
+    "regression": "< 2 hours",     # Nightly
+}
 ```
 
 ## Quality Advocacy
@@ -194,14 +296,6 @@ const feedbackCycle = {
 - [ ] Accessibility WCAG AA
 
 **Decision**: GO | NO-GO | GO with exceptions
-```
-
-### Team Education Program
-```markdown
-**Week 1-2**: Test fundamentals
-**Week 3-4**: Automation basics
-**Week 5-6**: Advanced topics (perf, security, API)
-**Ongoing**: Best practices, tool updates
 ```
 
 ## Test Planning
